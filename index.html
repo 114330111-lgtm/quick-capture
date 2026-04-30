@@ -109,12 +109,31 @@
   }
   .tag-input-wrap { display: flex; align-items: center; gap: 6px; flex: 1; }
   .tag-input-wrap label { font-size: 0.75rem; color: var(--text3); white-space: nowrap; }
-  #tagInput {
-    background: transparent; border: none; outline: none;
-    color: var(--text2); font-size: 0.8rem; font-family: inherit;
-    flex: 1; min-width: 60px;
+  #tagSelect {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text2);
+    font-size: 0.8rem;
+    font-family: inherit;
+    padding: 5px 8px;
+    outline: none;
+    cursor: pointer;
+    flex: 1;
+    max-width: 160px;
+    transition: border-color 0.15s, color 0.15s;
   }
-  #tagInput::placeholder { color: var(--text3); }
+  #tagSelect:focus { border-color: var(--accent); }
+  #tagSelect.auto-selected { border-color: var(--accent); color: var(--accent2); }
+  #tagSelect option { background: var(--surface2); color: var(--text); }
+  .auto-badge {
+    font-size: 0.68rem; color: var(--accent2);
+    background: rgba(124,106,247,0.15);
+    border: 1px solid rgba(124,106,247,0.3);
+    padding: 2px 7px; border-radius: 10px;
+    white-space: nowrap; animation: popIn 0.18s ease;
+  }
+  .auto-badge.hidden { display: none; }
   .save-btn {
     background: var(--accent);
     color: #fff; border: none;
@@ -126,24 +145,7 @@
   .save-btn:active { transform: translateY(0); }
   .hint { font-size: 0.72rem; color: var(--text3); white-space: nowrap; }
 
-  /* Auto-suggest */
-  .auto-suggest {
-    margin: 8px 24px 0;
-    display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
-  }
-  .auto-suggest.hidden { display: none; }
-  .suggest-label { font-size: 0.72rem; color: var(--text3); white-space: nowrap; }
-  .suggest-chip {
-    display: inline-flex; align-items: center; gap: 4px;
-    padding: 4px 11px; border-radius: 20px;
-    font-size: 0.75rem; font-weight: 600;
-    cursor: pointer; border: 1px dashed;
-    opacity: 0.85; transition: all 0.15s;
-    animation: popIn 0.18s ease;
-  }
-  .suggest-chip:hover { opacity: 1; transform: translateY(-1px); }
-  .suggest-chip.added { opacity: 0.35; cursor: default; text-decoration: line-through; }
-  @keyframes popIn { from{opacity:0;transform:scale(0.85)} to{opacity:0.85;transform:scale(1)} }
+  @keyframes popIn { from{opacity:0;transform:scale(0.85)} to{opacity:1;transform:scale(1)} }
 
   /* Toolbar */
   .toolbar {
@@ -280,16 +282,16 @@
   <div class="input-footer">
     <div class="tag-input-wrap">
       <label>🏷</label>
-      <input id="tagInput" type="text" placeholder="標籤（空白分隔）">
+      <select id="tagSelect">
+        <option value="">— 選擇標籤 —</option>
+      </select>
+      <span class="auto-badge hidden" id="autoBadge">🤖 自動</span>
     </div>
     <span class="hint">Ctrl+Enter</span>
     <button class="save-btn" onclick="saveIdea()">＋ 記下來</button>
   </div>
 </div>
 
-<div class="auto-suggest hidden" id="autoSuggest">
-  <span class="suggest-label">✦ 建議標籤：</span>
-</div>
 
 <div class="toolbar">
   <div class="search-wrap">
@@ -398,14 +400,16 @@ onSnapshot(collection(db, 'ideas'), snapshot => {
 async function saveIdea() {
   const text = document.getElementById('ideaInput').value.trim();
   if (!text) { toast('請輸入想法內容 😅'); return; }
-  const tagStr = document.getElementById('tagInput').value.trim();
-  const tags = tagStr ? tagStr.split(/\s+/).filter(Boolean) : [];
+  const sel = document.getElementById('tagSelect');
+  const tags = sel.value ? [sel.value] : [];
   setSyncStatus('syncing');
   try {
     await addDoc(collection(db, 'ideas'), { text, tags, time: serverTimestamp() });
     document.getElementById('ideaInput').value = '';
-    document.getElementById('tagInput').value = '';
-    document.getElementById('autoSuggest').classList.add('hidden');
+    sel.value = '';
+    sel.classList.remove('auto-selected');
+    sel.dataset.userSelected = '0';
+    document.getElementById('autoBadge').classList.add('hidden');
     toast('✅ 已記下！');
   } catch(e) { toast(`❌ 儲存失敗：${e.code || e.message}`); setSyncStatus('offline'); }
   document.getElementById('ideaInput').focus();
@@ -474,23 +478,21 @@ function autoDetectTags(text) {
 
 function renderSuggestions() {
   const text = document.getElementById('ideaInput').value;
-  const currentTags = document.getElementById('tagInput').value.trim().split(/\s+/).filter(Boolean);
+  const sel = document.getElementById('tagSelect');
+  const badge = document.getElementById('autoBadge');
+  // Don't override if user manually chose a tag
+  if (sel.dataset.userSelected === '1') return;
   const matches = autoDetectTags(text);
-  const wrap = document.getElementById('autoSuggest');
-  if (!text.trim() || matches.length === 0) { wrap.classList.add('hidden'); return; }
-  wrap.classList.remove('hidden');
-  wrap.innerHTML = '<span class="suggest-label">✦ 建議標籤：</span>'
-    + matches.map(r => {
-        const already = currentTags.includes(r.tag);
-        return `<span class="suggest-chip ${r.color} ${already?'added':''}" onclick="addSuggestedTag('${r.tag}',this)">${r.emoji} ${r.tag}</span>`;
-      }).join('');
-}
-
-function addSuggestedTag(tag, el) {
-  if (el.classList.contains('added')) return;
-  const inp = document.getElementById('tagInput');
-  inp.value = inp.value.trim() ? inp.value.trim() + ' ' + tag : tag;
-  el.classList.add('added');
+  if (!text.trim() || matches.length === 0) {
+    sel.value = '';
+    sel.classList.remove('auto-selected');
+    badge.classList.add('hidden');
+    return;
+  }
+  sel.value = matches[0].tag;
+  sel.classList.add('auto-selected');
+  badge.textContent = `🤖 自動偵測`;
+  badge.classList.remove('hidden');
 }
 
 // ── Render ──────────────────────────────────────────────────────
@@ -579,6 +581,18 @@ function exportTxt() {
   toast('⬇ 匯出成功！');
 }
 
+// ── Populate tag dropdown ────────────────────────────────────────
+(function populateTagSelect() {
+  const sel = document.getElementById('tagSelect');
+  AUTO_TAGS.forEach(r => {
+    const opt = document.createElement('option');
+    opt.value = r.tag;
+    opt.textContent = `${r.emoji} ${r.tag}`;
+    sel.appendChild(opt);
+  });
+  sel.dataset.userSelected = '0';
+})();
+
 // ── Event listeners ─────────────────────────────────────────────
 document.getElementById('ideaInput').addEventListener('keydown', e => {
   if (e.ctrlKey && e.key === 'Enter') { e.preventDefault(); saveIdea(); }
@@ -590,9 +604,16 @@ document.getElementById('editText').addEventListener('keydown', e => {
 document.getElementById('editModal').addEventListener('click', e => {
   if (e.target === document.getElementById('editModal')) closeEdit();
 });
+// Manual override: mark as user-selected, remove auto styling
+document.getElementById('tagSelect').addEventListener('change', () => {
+  const sel = document.getElementById('tagSelect');
+  sel.dataset.userSelected = '1';
+  sel.classList.remove('auto-selected');
+  document.getElementById('autoBadge').classList.add('hidden');
+});
 
 // ── Expose to global (needed for onclick="") ────────────────────
-Object.assign(window, { saveIdea, deleteIdea, openEdit, closeEdit, confirmEdit, setFilter, exportTxt, clearAll, addSuggestedTag });
+Object.assign(window, { saveIdea, deleteIdea, openEdit, closeEdit, confirmEdit, setFilter, exportTxt, clearAll });
 
 // ── Service worker ──────────────────────────────────────────────
 if ('serviceWorker' in navigator) {
