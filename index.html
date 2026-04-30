@@ -324,7 +324,7 @@
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import {
-  initializeFirestore, persistentLocalCache, persistentMultipleTabManager,
+  getFirestore,
   collection, onSnapshot, addDoc, deleteDoc, doc, updateDoc,
   serverTimestamp, query, orderBy, writeBatch
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
@@ -340,9 +340,7 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const db = initializeFirestore(app, {
-  localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
-});
+const db = getFirestore(app);
 
 // ── State ───────────────────────────────────────────────────────
 let ideas = [];
