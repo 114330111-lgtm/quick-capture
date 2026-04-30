@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="110" fill="#0f0f13"/>
+  <rect width="512" height="512" rx="110" fill="url(#bg)"/>
+  <defs>
+    <radialGradient id="bg" cx="40%" cy="35%" r="70%">
+      <stop offset="0%" stop-color="#2a1f6e"/>
+      <stop offset="100%" stop-color="#0f0f13"/>
+    </radialGradient>
+  </defs>
+  <!-- bulb body -->
+  <path d="M256 120 a96 96 0 0 1 60 171 l-8 44 a8 8 0 0 1-8 7 h-88 a8 8 0 0 1-8-7 l-8-44 A96 96 0 0 1 256 120z" fill="#a78bfa"/>
+  <!-- filament shine -->
+  <ellipse cx="226" cy="162" rx="18" ry="26" fill="rgba(255,255,255,0.22)" transform="rotate(-20 226 162)"/>
+  <!-- base segments -->
+  <rect x="208" y="342" width="96" height="18" rx="6" fill="#7c6af7"/>
+  <rect x="214" y="366" width="84" height="16" rx="6" fill="#6052d4"/>
+  <rect x="222" y="388" width="68" height="14" rx="7" fill="#4c3fb8"/>
+  <!-- glow -->
+  <ellipse cx="256" cy="256" rx="130" ry="130" fill="rgba(124,106,247,0.07)"/>
+</svg>

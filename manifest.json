@@ -1,0 +1,15 @@
+{
+  "name": "快速靈感捕捉",
+  "short_name": "靈感捕捉",
+  "description": "隨時記錄突然冒出的點子，自動雲端同步",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0f0f13",
+  "theme_color": "#7c6af7",
+  "orientation": "portrait-primary",
+  "lang": "zh-TW",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

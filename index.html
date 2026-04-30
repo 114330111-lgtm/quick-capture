@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>💡 快速靈感捕捉</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#7c6af7">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="靈感捕捉">
+<link rel="apple-touch-icon" href="icon.svg">
+<style>
+  :root {
+    --bg: #0f0f13;
+    --surface: #1a1a24;
+    --surface2: #22222f;
+    --border: #2e2e42;
+    --accent: #7c6af7;
+    --accent2: #a78bfa;
+    --text: #e8e6f0;
+    --text2: #9896a8;
+    --text3: #5a5870;
+    --green: #34d399;
+    --red: #f87171;
+    --yellow: #fbbf24;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Header */
+  header {
+    padding: 20px 24px 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .logo { font-size: 1.25rem; font-weight: 700; color: var(--accent2); letter-spacing: -0.5px; display: flex; align-items: center; gap: 8px; }
+  .logo span { color: var(--text2); font-weight: 400; }
+  .sync-wrap { display: flex; align-items: center; gap: 5px; font-size: 0.72rem; color: var(--text3); }
+  .sync-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--text3); transition: background 0.4s;
+  }
+  .sync-dot.online  { background: var(--green); }
+  .sync-dot.syncing { background: var(--yellow); animation: pulse 1s infinite; }
+  .sync-dot.offline { background: var(--red); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .header-actions { display: flex; gap: 8px; }
+  .btn-icon {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    padding: 7px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.15s;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .btn-icon:hover { background: var(--surface); color: var(--text); border-color: var(--accent); }
+
+  /* Input area */
+  .capture-area {
+    margin: 20px 24px 0;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: border-color 0.15s;
+  }
+  .capture-area:focus-within { border-color: var(--accent); }
+  #ideaInput {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text);
+    font-size: 1rem;
+    line-height: 1.6;
+    padding: 18px 20px 12px;
+    resize: none;
+    min-height: 90px;
+    font-family: inherit;
+    caret-color: var(--accent2);
+  }
+  #ideaInput::placeholder { color: var(--text3); }
+  .input-footer {
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid var(--border);
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .tag-input-wrap { display: flex; align-items: center; gap: 6px; flex: 1; }
+  .tag-input-wrap label { font-size: 0.75rem; color: var(--text3); white-space: nowrap; }
+  #tagInput {
+    background: transparent; border: none; outline: none;
+    color: var(--text2); font-size: 0.8rem; font-family: inherit;
+    flex: 1; min-width: 60px;
+  }
+  #tagInput::placeholder { color: var(--text3); }
+  .save-btn {
+    background: var(--accent);
+    color: #fff; border: none;
+    padding: 8px 18px; border-radius: 8px;
+    cursor: pointer; font-size: 0.85rem; font-weight: 600;
+    font-family: inherit; transition: all 0.15s; white-space: nowrap;
+  }
+  .save-btn:hover { background: var(--accent2); transform: translateY(-1px); }
+  .save-btn:active { transform: translateY(0); }
+  .hint { font-size: 0.72rem; color: var(--text3); white-space: nowrap; }
+
+  /* Auto-suggest */
+  .auto-suggest {
+    margin: 8px 24px 0;
+    display: flex; align-items: center; gap: 7px; flex-wrap: wrap;
+  }
+  .auto-suggest.hidden { display: none; }
+  .suggest-label { font-size: 0.72rem; color: var(--text3); white-space: nowrap; }
+  .suggest-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 4px 11px; border-radius: 20px;
+    font-size: 0.75rem; font-weight: 600;
+    cursor: pointer; border: 1px dashed;
+    opacity: 0.85; transition: all 0.15s;
+    animation: popIn 0.18s ease;
+  }
+  .suggest-chip:hover { opacity: 1; transform: translateY(-1px); }
+  .suggest-chip.added { opacity: 0.35; cursor: default; text-decoration: line-through; }
+  @keyframes popIn { from{opacity:0;transform:scale(0.85)} to{opacity:0.85;transform:scale(1)} }
+
+  /* Toolbar */
+  .toolbar {
+    margin: 16px 24px 0;
+    display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+  }
+  .search-wrap {
+    flex: 1; min-width: 140px;
+    display: flex; align-items: center;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 0 12px; gap: 7px;
+  }
+  #searchInput {
+    background: transparent; border: none; outline: none;
+    color: var(--text); font-size: 0.85rem; font-family: inherit;
+    padding: 9px 0; flex: 1;
+  }
+  #searchInput::placeholder { color: var(--text3); }
+  .filter-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .filter-tag {
+    padding: 5px 12px; border-radius: 20px; font-size: 0.75rem;
+    cursor: pointer; border: 1px solid var(--border);
+    background: var(--surface); color: var(--text2); transition: all 0.12s;
+  }
+  .filter-tag:hover { border-color: var(--accent); color: var(--accent2); }
+  .filter-tag.active { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+
+  /* Stats */
+  .stats { margin: 12px 24px 0; display: flex; gap: 16px; font-size: 0.75rem; color: var(--text3); }
+  .stats strong { color: var(--text2); }
+
+  /* List */
+  .list-wrap { flex: 1; padding: 12px 24px 24px; overflow-y: auto; }
+  #ideaList { display: flex; flex-direction: column; gap: 10px; }
+  .idea-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 16px;
+    position: relative; transition: border-color 0.15s, transform 0.15s;
+    animation: slideIn 0.2s ease;
+  }
+  .idea-card:hover { border-color: #3d3b55; transform: translateX(2px); }
+  @keyframes slideIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+  .idea-text { font-size: 0.92rem; line-height: 1.6; color: var(--text); white-space: pre-wrap; word-break: break-word; }
+  .idea-meta { display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+  .idea-time { font-size: 0.72rem; color: var(--text3); }
+  .tag-badge { padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.3px; }
+  .card-actions {
+    position: absolute; top: 10px; right: 12px;
+    display: flex; gap: 4px; opacity: 0; transition: opacity 0.15s;
+  }
+  .idea-card:hover .card-actions { opacity: 1; }
+  /* mobile: always show */
+  @media (hover: none) { .card-actions { opacity: 1; } }
+  .card-btn {
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text3); padding: 3px 7px; border-radius: 5px;
+    cursor: pointer; font-size: 0.7rem; transition: all 0.12s;
+  }
+  .card-btn:hover { color: var(--text); border-color: var(--accent); }
+  .card-btn.del:hover { color: var(--red); border-color: var(--red); }
+
+  /* Empty */
+  .empty { text-align: center; padding: 48px 20px; color: var(--text3); }
+  .empty-icon { font-size: 3rem; margin-bottom: 12px; }
+  .empty p { font-size: 0.9rem; line-height: 1.7; }
+
+  /* Toast */
+  #toast {
+    position: fixed; bottom: calc(24px + env(safe-area-inset-bottom)); right: 24px;
+    background: var(--surface2); border: 1px solid var(--border);
+    color: var(--text); padding: 10px 18px; border-radius: 10px;
+    font-size: 0.85rem; opacity: 0; transform: translateY(8px);
+    transition: all 0.2s; pointer-events: none; z-index: 99;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+  #toast.show { opacity: 1; transform: translateY(0); }
+
+  /* Tag colour palette */
+  .tc0 { background: #1e1b4b; color: #a78bfa; border-color: #3730a3; }
+  .tc1 { background: #064e3b; color: #34d399; border-color: #065f46; }
+  .tc2 { background: #7c2d12; color: #fb923c; border-color: #9a3412; }
+  .tc3 { background: #831843; color: #f472b6; border-color: #9d174d; }
+  .tc4 { background: #1e3a5f; color: #60a5fa; border-color: #1e40af; }
+  .tc5 { background: #3b2000; color: #fbbf24; border-color: #78350f; }
+
+  /* Modal */
+  .modal-bg {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+    display: none; align-items: center; justify-content: center; z-index: 50;
+  }
+  .modal-bg.open { display: flex; }
+  .modal {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 24px;
+    max-width: 420px; width: 90%;
+  }
+  .modal h3 { font-size: 1rem; margin-bottom: 14px; color: var(--accent2); }
+  .modal textarea {
+    width: 100%; height: 120px; background: var(--bg);
+    border: 1px solid var(--border); border-radius: 8px;
+    color: var(--text); font-family: inherit; font-size: 0.9rem;
+    padding: 10px 12px; resize: vertical; outline: none;
+  }
+  .modal textarea:focus { border-color: var(--accent); }
+  .modal-footer { display: flex; gap: 8px; justify-content: flex-end; margin-top: 14px; }
+  .modal-btn {
+    padding: 8px 18px; border-radius: 8px; cursor: pointer;
+    font-family: inherit; font-size: 0.85rem; border: 1px solid var(--border);
+    background: var(--surface2); color: var(--text2); transition: all 0.12s;
+  }
+  .modal-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+  .modal-btn:hover { border-color: var(--accent); color: var(--text); }
+  .modal-btn.primary:hover { background: var(--accent2); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    💡 靈感捕捉 <span>Quick Capture</span>
+    <div class="sync-wrap">
+      <div class="sync-dot" id="syncDot"></div>
+      <span id="syncLabel">連線中…</span>
+    </div>
+  </div>
+  <div class="header-actions">
+    <button class="btn-icon" onclick="exportTxt()">⬇ 匯出</button>
+    <button class="btn-icon" onclick="clearAll()">🗑 清除全部</button>
+  </div>
+</header>
+
+<div class="capture-area">
+  <textarea id="ideaInput" placeholder="突然想到什麼？直接輸入… (Ctrl+Enter 儲存)" rows="4"></textarea>
+  <div class="input-footer">
+    <div class="tag-input-wrap">
+      <label>🏷</label>
+      <input id="tagInput" type="text" placeholder="標籤（空白分隔）">
+    </div>
+    <span class="hint">Ctrl+Enter</span>
+    <button class="save-btn" onclick="saveIdea()">＋ 記下來</button>
+  </div>
+</div>
+
+<div class="auto-suggest hidden" id="autoSuggest">
+  <span class="suggest-label">✦ 建議標籤：</span>
+</div>
+
+<div class="toolbar">
+  <div class="search-wrap">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input id="searchInput" type="text" placeholder="搜尋…" oninput="renderList()">
+  </div>
+  <div class="filter-tags" id="filterTags"></div>
+</div>
+
+<div class="stats">
+  <span>共 <strong id="totalCount">0</strong> 筆</span>
+  <span>顯示 <strong id="showCount">0</strong> 筆</span>
+</div>
+
+<div class="list-wrap">
+  <div id="ideaList"><div class="empty"><div class="empty-icon">🔄</div><p>連接雲端中…</p></div></div>
+</div>
+
+<div id="toast"></div>
+
+<div class="modal-bg" id="editModal">
+  <div class="modal">
+    <h3>✏️ 編輯想法</h3>
+    <textarea id="editText"></textarea>
+    <div class="modal-footer">
+      <button class="modal-btn" onclick="closeEdit()">取消</button>
+      <button class="modal-btn primary" onclick="confirmEdit()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import {
+  initializeFirestore, persistentLocalCache, persistentMultipleTabManager,
+  collection, onSnapshot, addDoc, deleteDoc, doc, updateDoc,
+  serverTimestamp, query, orderBy, writeBatch
+} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+// ── Firebase setup ──────────────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyCAomToi3JtSYjOtEt49wgVEVQ9VfCe32M",
+  authDomain: "quick-capture-6f954.firebaseapp.com",
+  projectId: "quick-capture-6f954",
+  storageBucket: "quick-capture-6f954.firebasestorage.app",
+  messagingSenderId: "729180119317",
+  appId: "1:729180119317:web:b0e2556fa4884bd0dc091c"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = initializeFirestore(app, {
+  localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+});
+
+// ── State ───────────────────────────────────────────────────────
+let ideas = [];
+let activeFilter = null;
+let editingId = null;
+
+const TAG_COLORS = ['tc0','tc1','tc2','tc3','tc4','tc5'];
+const tagColorMap = {};
+let colorIdx = 0;
+
+function getTagColor(tag) {
+  if (!tagColorMap[tag]) { tagColorMap[tag] = TAG_COLORS[colorIdx++ % TAG_COLORS.length]; }
+  return tagColorMap[tag];
+}
+
+// ── Sync status ─────────────────────────────────────────────────
+function setSyncStatus(status) {
+  const dot = document.getElementById('syncDot');
+  const lbl = document.getElementById('syncLabel');
+  dot.className = 'sync-dot ' + status;
+  lbl.textContent = { online:'已同步', syncing:'同步中…', offline:'離線' }[status] || '';
+}
+
+window.addEventListener('online',  () => setSyncStatus('online'));
+window.addEventListener('offline', () => setSyncStatus('offline'));
+setSyncStatus('syncing');
+
+// ── Real-time listener ──────────────────────────────────────────
+const q = query(collection(db, 'ideas'), orderBy('time', 'desc'));
+onSnapshot(q, snapshot => {
+  ideas = snapshot.docs.map(d => ({
+    firestoreId: d.id,
+    text: d.data().text || '',
+    tags: d.data().tags || [],
+    time: d.data().time?.toDate?.()?.toISOString() || new Date().toISOString()
+  }));
+  renderList();
+  renderFilterTags();
+  setSyncStatus(navigator.onLine ? 'online' : 'offline');
+}, err => {
+  console.error(err);
+  setSyncStatus('offline');
+});
+
+// ── CRUD ────────────────────────────────────────────────────────
+async function saveIdea() {
+  const text = document.getElementById('ideaInput').value.trim();
+  if (!text) { toast('請輸入想法內容 😅'); return; }
+  const tagStr = document.getElementById('tagInput').value.trim();
+  const tags = tagStr ? tagStr.split(/\s+/).filter(Boolean) : [];
+  setSyncStatus('syncing');
+  try {
+    await addDoc(collection(db, 'ideas'), { text, tags, time: serverTimestamp() });
+    document.getElementById('ideaInput').value = '';
+    document.getElementById('tagInput').value = '';
+    document.getElementById('autoSuggest').classList.add('hidden');
+    toast('✅ 已記下！');
+  } catch { toast('❌ 儲存失敗，請檢查網路'); }
+  document.getElementById('ideaInput').focus();
+}
+
+async function deleteIdea(fid) {
+  setSyncStatus('syncing');
+  try { await deleteDoc(doc(db, 'ideas', fid)); toast('🗑 已刪除'); }
+  catch { toast('❌ 刪除失敗'); }
+}
+
+function openEdit(fid) {
+  const idea = ideas.find(i => i.firestoreId === fid);
+  if (!idea) return;
+  editingId = fid;
+  document.getElementById('editText').value = idea.text;
+  document.getElementById('editModal').classList.add('open');
+  setTimeout(() => document.getElementById('editText').focus(), 50);
+}
+
+function closeEdit() {
+  editingId = null;
+  document.getElementById('editModal').classList.remove('open');
+}
+
+async function confirmEdit() {
+  const txt = document.getElementById('editText').value.trim();
+  if (!txt) return;
+  setSyncStatus('syncing');
+  try { await updateDoc(doc(db, 'ideas', editingId), { text: txt }); toast('✏️ 已更新'); }
+  catch { toast('❌ 更新失敗'); }
+  closeEdit();
+}
+
+async function clearAll() {
+  if (ideas.length === 0) { toast('已經沒有資料了'); return; }
+  if (!confirm(`確定要刪除全部 ${ideas.length} 筆記錄嗎？`)) return;
+  setSyncStatus('syncing');
+  try {
+    const batch = writeBatch(db);
+    ideas.forEach(i => batch.delete(doc(db, 'ideas', i.firestoreId)));
+    await batch.commit();
+    activeFilter = null;
+    toast('🗑 已全部清除');
+  } catch { toast('❌ 清除失敗'); }
+}
+
+// ── Auto-classify ───────────────────────────────────────────────
+const AUTO_TAGS = [
+  { tag:'工作', emoji:'💼', color:'tc4', keywords:['會議','報告','專案','任務','客戶','老闆','開會','簡報','提案','截止','deadline','同事','主管','上班','職場','kpi','業績','企劃','合約'] },
+  { tag:'靈感', emoji:'💡', color:'tc0', keywords:['點子','創意','想法','如果','可以做','應該做','試試','發現','突然','新的','概念','設計','構想','或許','也許','要不要','感覺可以'] },
+  { tag:'待辦', emoji:'✅', color:'tc1', keywords:['記得','要做','需要','買','訂','約','明天','今天','下週','稍後','記住','別忘','不要忘','提醒','記一下','去做','安排'] },
+  { tag:'學習', emoji:'📚', color:'tc2', keywords:['學','看書','研究','筆記','讀','課程','教學','練習','複習','考試','技術','原理','怎麼學','搞懂','理解','心得'] },
+  { tag:'生活', emoji:'🌿', color:'tc1', keywords:['吃','食','旅遊','旅行','朋友','家人','健康','運動','睡','休息','假期','娛樂','電影','遊戲','週末','出去','放鬆'] },
+  { tag:'財務', emoji:'💰', color:'tc5', keywords:['錢','費用','預算','投資','存款','消費','花費','帳單','收入','薪水','貸款','保險','股票','支出','省錢'] },
+  { tag:'問題', emoji:'🔧', color:'tc3', keywords:['問題','錯誤','bug','修復','解決','怎麼','為什麼','搞不懂','卡住','不懂','奇怪','失敗','無法','不行'] },
+];
+
+function autoDetectTags(text) {
+  const lower = text.toLowerCase();
+  return AUTO_TAGS.filter(r => r.keywords.some(kw => lower.includes(kw.toLowerCase())));
+}
+
+function renderSuggestions() {
+  const text = document.getElementById('ideaInput').value;
+  const currentTags = document.getElementById('tagInput').value.trim().split(/\s+/).filter(Boolean);
+  const matches = autoDetectTags(text);
+  const wrap = document.getElementById('autoSuggest');
+  if (!text.trim() || matches.length === 0) { wrap.classList.add('hidden'); return; }
+  wrap.classList.remove('hidden');
+  wrap.innerHTML = '<span class="suggest-label">✦ 建議標籤：</span>'
+    + matches.map(r => {
+        const already = currentTags.includes(r.tag);
+        return `<span class="suggest-chip ${r.color} ${already?'added':''}" onclick="addSuggestedTag('${r.tag}',this)">${r.emoji} ${r.tag}</span>`;
+      }).join('');
+}
+
+function addSuggestedTag(tag, el) {
+  if (el.classList.contains('added')) return;
+  const inp = document.getElementById('tagInput');
+  inp.value = inp.value.trim() ? inp.value.trim() + ' ' + tag : tag;
+  el.classList.add('added');
+}
+
+// ── Render ──────────────────────────────────────────────────────
+function formatTime(iso) {
+  const d = new Date(iso), now = new Date(), diff = now - d;
+  if (diff < 60000) return '剛剛';
+  if (diff < 3600000) return Math.floor(diff/60000) + ' 分鐘前';
+  if (diff < 86400000) return Math.floor(diff/3600000) + ' 小時前';
+  if (diff < 604800000) return Math.floor(diff/86400000) + ' 天前';
+  return d.toLocaleDateString('zh-TW', {month:'short', day:'numeric'});
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function highlight(text, q) {
+  if (!q) return escHtml(text);
+  const re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'), 'gi');
+  return escHtml(text).replace(re, m => `<mark style="background:#4c3f91;color:#d8b4fe;border-radius:3px">${m}</mark>`);
+}
+
+function renderList() {
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  const filtered = ideas.filter(i => {
+    const matchText = i.text.toLowerCase().includes(q);
+    const matchTag  = i.tags.some(t => t.toLowerCase().includes(q));
+    const matchFilter = activeFilter ? i.tags.includes(activeFilter) : true;
+    return (matchText || matchTag) && matchFilter;
+  });
+  document.getElementById('totalCount').textContent = ideas.length;
+  document.getElementById('showCount').textContent  = filtered.length;
+  const list = document.getElementById('ideaList');
+  if (filtered.length === 0) {
+    list.innerHTML = `<div class="empty"><div class="empty-icon">🌱</div><p>${ideas.length===0?'還沒有任何記錄<br>把第一個想法記下來吧！':'沒有符合的結果'}</p></div>`;
+    return;
+  }
+  list.innerHTML = filtered.map(idea => {
+    const tags = idea.tags.map(t => `<span class="tag-badge ${getTagColor(t)}">${escHtml(t)}</span>`).join('');
+    const fid  = escHtml(idea.firestoreId);
+    return `
+    <div class="idea-card">
+      <div class="card-actions">
+        <button class="card-btn" onclick="openEdit('${fid}')">編輯</button>
+        <button class="card-btn del" onclick="deleteIdea('${fid}')">✕</button>
+      </div>
+      <div class="idea-text">${highlight(idea.text, q)}</div>
+      <div class="idea-meta">
+        <span class="idea-time">${formatTime(idea.time)}</span>
+        ${tags}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderFilterTags() {
+  const allTags = [...new Set(ideas.flatMap(i => i.tags))];
+  const wrap = document.getElementById('filterTags');
+  if (!allTags.length) { wrap.innerHTML = ''; return; }
+  wrap.innerHTML = `<span class="filter-tag ${!activeFilter?'active':''}" onclick="setFilter(null)">全部</span>`
+    + allTags.map(t =>
+        `<span class="filter-tag ${activeFilter===t?'active':''} ${getTagColor(t)}" onclick="setFilter('${escHtml(t)}')">${escHtml(t)}</span>`
+      ).join('');
+}
+
+function setFilter(tag) { activeFilter = tag; renderFilterTags(); renderList(); }
+
+function toast(msg, dur=2200) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), dur);
+}
+
+function exportTxt() {
+  if (!ideas.length) { toast('沒有資料可匯出 😅'); return; }
+  const lines = ideas.map(i => {
+    const d = new Date(i.time).toLocaleString('zh-TW');
+    const tags = i.tags.length ? `[${i.tags.join(', ')}]` : '';
+    return `${d} ${tags}\n${i.text}`;
+  }).join('\n\n---\n\n');
+  const a = Object.assign(document.createElement('a'), {
+    href: URL.createObjectURL(new Blob([lines], {type:'text/plain;charset=utf-8'})),
+    download: `靈感筆記_${new Date().toLocaleDateString('zh-TW').replace(/\//g,'-')}.txt`
+  });
+  a.click();
+  toast('⬇ 匯出成功！');
+}
+
+// ── Event listeners ─────────────────────────────────────────────
+document.getElementById('ideaInput').addEventListener('keydown', e => {
+  if (e.ctrlKey && e.key === 'Enter') { e.preventDefault(); saveIdea(); }
+});
+document.getElementById('ideaInput').addEventListener('input', renderSuggestions);
+document.getElementById('editText').addEventListener('keydown', e => {
+  if (e.ctrlKey && e.key === 'Enter') { e.preventDefault(); confirmEdit(); }
+});
+document.getElementById('editModal').addEventListener('click', e => {
+  if (e.target === document.getElementById('editModal')) closeEdit();
+});
+
+// ── Expose to global (needed for onclick="") ────────────────────
+Object.assign(window, { saveIdea, deleteIdea, openEdit, closeEdit, confirmEdit, setFilter, exportTxt, clearAll, addSuggestedTag });
+
+// ── Service worker ──────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+
+document.getElementById('ideaInput').focus();
+</script>
+</body>
+</html>
