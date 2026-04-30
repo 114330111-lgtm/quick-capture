@@ -379,10 +379,12 @@ onSnapshot(q, snapshot => {
   }));
   renderList();
   renderFilterTags();
-  setSyncStatus(navigator.onLine ? 'online' : 'offline');
+  setSyncStatus('online');
 }, err => {
-  console.error(err);
+  console.error('Firestore error:', err.code, err.message);
   setSyncStatus('offline');
+  const list = document.getElementById('ideaList');
+  list.innerHTML = `<div class="empty"><div class="empty-icon">⚠️</div><p>無法連接雲端資料庫<br><small style="color:var(--text3)">${err.code}: ${err.message}</small></p></div>`;
 });
 
 // ── CRUD ────────────────────────────────────────────────────────
