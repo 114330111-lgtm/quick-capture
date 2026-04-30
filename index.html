@@ -369,22 +369,29 @@ window.addEventListener('offline', () => setSyncStatus('offline'));
 setSyncStatus('syncing');
 
 // ── Real-time listener ──────────────────────────────────────────
-const q = query(collection(db, 'ideas'), orderBy('time', 'desc'));
-onSnapshot(q, snapshot => {
-  ideas = snapshot.docs.map(d => ({
-    firestoreId: d.id,
-    text: d.data().text || '',
-    tags: d.data().tags || [],
-    time: d.data().time?.toDate?.()?.toISOString() || new Date().toISOString()
-  }));
+// Use collection without orderBy to avoid index requirements; sort in JS instead
+onSnapshot(collection(db, 'ideas'), snapshot => {
+  ideas = snapshot.docs
+    .map(d => ({
+      firestoreId: d.id,
+      text: d.data().text || '',
+      tags: d.data().tags || [],
+      time: d.data().time?.toDate?.()?.toISOString() || new Date(0).toISOString()
+    }))
+    .sort((a, b) => new Date(b.time) - new Date(a.time));
   renderList();
   renderFilterTags();
   setSyncStatus('online');
+  document.getElementById('syncLabel').textContent = `已同步 (${ideas.length} 筆)`;
 }, err => {
   console.error('Firestore error:', err.code, err.message);
   setSyncStatus('offline');
-  const list = document.getElementById('ideaList');
-  list.innerHTML = `<div class="empty"><div class="empty-icon">⚠️</div><p>無法連接雲端資料庫<br><small style="color:var(--text3)">${err.code}: ${err.message}</small></p></div>`;
+  document.getElementById('ideaList').innerHTML =
+    `<div class="empty"><div class="empty-icon">⚠️</div>
+     <p>無法連接資料庫<br>
+     <strong style="color:var(--red)">${err.code}</strong><br>
+     <small style="color:var(--text3)">${err.message}</small><br><br>
+     請確認 Firebase Console 已建立 Firestore 資料庫</p></div>`;
 });
 
 // ── CRUD ────────────────────────────────────────────────────────
@@ -400,7 +407,7 @@ async function saveIdea() {
     document.getElementById('tagInput').value = '';
     document.getElementById('autoSuggest').classList.add('hidden');
     toast('✅ 已記下！');
-  } catch { toast('❌ 儲存失敗，請檢查網路'); }
+  } catch(e) { toast(`❌ 儲存失敗：${e.code || e.message}`); setSyncStatus('offline'); }
   document.getElementById('ideaInput').focus();
 }
 
