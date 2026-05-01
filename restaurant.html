@@ -1,0 +1,1953 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<meta name="theme-color" content="#1c1917">
+<title>Carnet de Cuisine · 美食筆記</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍽️</text></svg>">
+<style>
+  :root {
+    --bg: #faf6f0;
+    --bg2: #f5ede0;
+    --paper: #ffffff;
+    --ink: #1c1917;
+    --ink-soft: #57534e;
+    --ink-mute: #a8a29e;
+    --line: #d6d3d1;
+    --line-soft: #e7e5e4;
+    --rose-bg: #fff1f2;
+    --rose-text: #be123c;
+    --rose-border: #fecdd3;
+    --emerald-bg: #ecfdf5;
+    --emerald-text: #047857;
+    --emerald-border: #a7f3d0;
+    --amber-bg: #fffbeb;
+    --amber-text: #b45309;
+    --amber-border: #fde68a;
+    --gold: #d97706;
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    margin: 0; padding: 0;
+    font-family: "Noto Serif TC", "Songti TC", "PingFang TC", "Source Han Serif TC", Georgia, serif;
+    background: linear-gradient(135deg, var(--bg) 0%, var(--bg2) 100%);
+    color: var(--ink);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  input, select, textarea { font-family: inherit; font-size: 14px; }
+  input[type="number"] { -moz-appearance: textfield; }
+  input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+  /* Header */
+  .header {
+    border-bottom: 2px solid var(--ink);
+    background: #fafaf9;
+  }
+  .header-inner {
+    max-width: 1100px; margin: 0 auto;
+    padding: 28px 20px 24px;
+  }
+  .header-top {
+    display: flex; justify-content: space-between; align-items: baseline;
+    flex-wrap: wrap; gap: 12px;
+  }
+  .title {
+    font-size: 36px; font-weight: 700; letter-spacing: -0.02em;
+    margin: 0; line-height: 1.1;
+  }
+  .subtitle {
+    font-style: italic; color: var(--ink-soft);
+    font-size: 13px; margin: 4px 0 0;
+  }
+  .header-actions { display: flex; gap: 8px; align-items: center; }
+  .icon-btn {
+    padding: 8px; border-radius: 6px; transition: background 0.15s;
+    color: var(--ink-soft); display: inline-flex;
+  }
+  .icon-btn:hover { background: rgba(0,0,0,0.06); }
+  .btn-primary {
+    background: var(--ink); color: var(--bg);
+    padding: 10px 18px; border-radius: 999px;
+    font-size: 13px; font-weight: 500;
+    display: inline-flex; align-items: center; gap: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+    transition: background 0.15s, transform 0.1s;
+  }
+  .btn-primary:hover { background: #44403c; }
+  .btn-primary:active { transform: scale(0.97); }
+
+  /* Stats */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 22px; }
+  .stat-card {
+    padding: 14px; border-radius: 10px; text-align: left;
+    background: var(--paper); border: 2px solid var(--line-soft);
+    transition: all 0.15s;
+  }
+  .stat-card:hover { border-color: var(--ink-mute); transform: translateY(-1px); }
+  .stat-card.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .stat-num { font-size: 26px; font-weight: 700; line-height: 1; }
+  .stat-label {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--ink-soft); margin-top: 4px;
+  }
+  .stat-card.active .stat-label { color: rgba(255,255,255,0.7); }
+
+  /* Filters */
+  .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+  .filters { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 20px; }
+  .search-wrap { position: relative; flex: 1; min-width: 200px; }
+  .search-wrap svg {
+    position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+    color: var(--ink-mute); pointer-events: none;
+  }
+  .search {
+    width: 100%; padding: 9px 12px 9px 36px;
+    background: var(--paper); border: 1px solid var(--line);
+    border-radius: 8px; outline: none; font-size: 14px;
+  }
+  .search:focus { border-color: var(--ink); }
+  .filter-select {
+    padding: 9px 12px; background: var(--paper);
+    border: 1px solid var(--line); border-radius: 8px;
+    font-size: 14px; outline: none;
+  }
+  .view-toggle {
+    display: flex; background: #e7e5e4; border-radius: 8px; padding: 3px;
+  }
+  .view-toggle button {
+    padding: 6px 14px; border-radius: 6px; font-size: 13px;
+    color: var(--ink-soft); transition: all 0.15s;
+  }
+  .view-toggle button.active { background: white; color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+
+  /* City group */
+  .city-group { margin-bottom: 36px; }
+  .city-header {
+    display: flex; align-items: baseline; gap: 12px;
+    border-bottom: 1px solid var(--line); padding-bottom: 8px; margin-bottom: 16px;
+  }
+  .city-name { font-size: 24px; font-weight: 700; margin: 0; }
+  .city-count { font-size: 13px; color: var(--ink-mute); font-style: italic; }
+
+  .grid {
+    display: grid; gap: 14px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+
+  /* Restaurant card */
+  .card {
+    background: var(--paper); border: 1px solid var(--line-soft);
+    border-radius: 10px; overflow: hidden; text-align: left;
+    transition: all 0.15s; cursor: pointer; width: 100%;
+    display: flex; flex-direction: column;
+  }
+  .card:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.08); border-color: var(--line); transform: translateY(-2px); }
+  .card-photo { aspect-ratio: 16/10; background: var(--bg); overflow: hidden; }
+  .card-photo img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+  .card:hover .card-photo img { transform: scale(1.04); }
+  .card-body { padding: 14px; }
+  .card-top { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 8px; align-items: flex-start; }
+  .card-name { font-size: 17px; font-weight: 700; line-height: 1.25; margin: 0; }
+  .card-meta {
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+    font-size: 13px; color: var(--ink-soft); margin-bottom: 8px;
+  }
+  .card-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
+  .tag {
+    font-size: 11px; background: #f5f5f4; color: var(--ink-soft);
+    padding: 2px 8px; border-radius: 4px;
+  }
+  .card-notes {
+    font-size: 13px; color: var(--ink-soft); font-style: italic;
+    margin-top: 6px; display: -webkit-box; -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .card-alert {
+    display: flex; gap: 6px; align-items: flex-start;
+    background: var(--amber-bg); border: 1px solid var(--amber-border);
+    border-radius: 6px; padding: 6px 8px; margin-top: 8px;
+    font-size: 12px; color: var(--amber-text);
+  }
+  .card-alert span {
+    display: -webkit-box; -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .card-district {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 11px; color: var(--ink-mute); margin-top: 8px;
+  }
+
+  /* Status pill */
+  .status-pill {
+    font-size: 11px; padding: 2px 8px; border-radius: 999px;
+    border: 1px solid; display: inline-flex; align-items: center; gap: 4px;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .status-wishlist { background: var(--rose-bg); color: var(--rose-text); border-color: var(--rose-border); }
+  .status-visited { background: var(--emerald-bg); color: var(--emerald-text); border-color: var(--emerald-border); }
+  .status-recommend { background: var(--amber-bg); color: var(--amber-text); border-color: var(--amber-border); }
+
+  /* Stars */
+  .stars { display: inline-flex; gap: 1px; }
+  .star { color: var(--line); }
+  .star.filled { color: #fbbf24; }
+
+  /* Empty state */
+  .empty {
+    text-align: center; padding: 70px 20px;
+  }
+  .empty-icon { font-size: 56px; margin-bottom: 12px; }
+  .empty h3 { font-size: 20px; margin: 0 0 6px; color: var(--ink); }
+  .empty p { font-style: italic; color: var(--ink-soft); margin: 0 0 24px; }
+
+  /* Modal */
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(28,25,23,0.6);
+    backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+    z-index: 100; display: flex; align-items: flex-start; justify-content: center;
+    padding: 20px; overflow-y: auto;
+  }
+  .modal {
+    background: var(--bg); border-radius: 10px; max-width: 640px; width: 100%;
+    margin: 30px 0; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    animation: modalIn 0.2s ease-out;
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .modal-header {
+    border-bottom: 1px solid var(--line);
+    padding: 16px 20px; display: flex; align-items: center; justify-content: space-between;
+    position: sticky; top: 0; background: var(--bg); border-radius: 10px 10px 0 0; z-index: 1;
+  }
+  .modal-title { font-size: 19px; font-weight: 700; margin: 0; }
+  .modal-body { padding: 20px; }
+  .modal-footer {
+    border-top: 1px solid var(--line); background: #f5f5f4;
+    padding: 14px 20px; display: flex; justify-content: space-between; align-items: center;
+    gap: 10px; border-radius: 0 0 10px 10px;
+  }
+  .btn-secondary {
+    padding: 8px 16px; color: var(--ink-soft); border-radius: 8px;
+    transition: background 0.15s;
+  }
+  .btn-secondary:hover { background: rgba(0,0,0,0.06); }
+  .btn-danger {
+    color: #dc2626; padding: 8px 12px; border-radius: 8px;
+    display: inline-flex; align-items: center; gap: 5px; font-size: 13px;
+  }
+  .btn-danger:hover { background: #fef2f2; }
+
+  /* Form */
+  .form-group { margin-bottom: 16px; }
+  .form-label {
+    display: block; font-size: 13px; font-weight: 600;
+    color: var(--ink-soft); margin-bottom: 6px;
+  }
+  .form-label .form-hint { font-weight: normal; font-size: 11px; color: var(--ink-mute); margin-left: 8px; font-style: italic; }
+  .form-input, .form-textarea, .form-select {
+    width: 100%; padding: 9px 12px;
+    border: 1px solid var(--line); border-radius: 8px;
+    background: var(--paper); outline: none;
+    transition: border-color 0.15s;
+  }
+  .form-input:focus, .form-textarea:focus, .form-select:focus { border-color: var(--ink); }
+  .form-textarea { resize: vertical; min-height: 80px; font-family: inherit; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-help { font-size: 11px; margin-top: 4px; font-style: italic; color: var(--ink-mute); }
+  .form-help.ok { color: var(--emerald-text); }
+  .form-help.warn { color: var(--amber-text); }
+
+  /* Status buttons */
+  .status-buttons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .status-btn {
+    padding: 9px 12px; border: 2px solid var(--line); border-radius: 8px;
+    background: var(--paper); font-size: 13px; font-weight: 500;
+    color: var(--ink-soft); display: inline-flex; align-items: center;
+    justify-content: center; gap: 6px; transition: all 0.15s;
+  }
+  .status-btn:hover { border-color: var(--ink-soft); }
+  .status-btn.active.wishlist { background: var(--rose-bg); color: var(--rose-text); border-color: var(--rose-border); }
+  .status-btn.active.visited { background: var(--emerald-bg); color: var(--emerald-text); border-color: var(--emerald-border); }
+  .status-btn.active.recommend { background: var(--amber-bg); color: var(--amber-text); border-color: var(--amber-border); }
+
+  /* Tags in form */
+  .tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  .tag-btn {
+    font-size: 12px; padding: 4px 10px; border-radius: 999px;
+    border: 1px solid var(--line); background: var(--paper); color: var(--ink-soft);
+    transition: all 0.15s;
+  }
+  .tag-btn:hover { border-color: var(--ink-soft); }
+  .tag-btn.active { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .tag-custom {
+    font-size: 12px; padding: 4px 10px; border-radius: 999px;
+    background: var(--amber-bg); color: var(--amber-text);
+    border: 1px solid var(--amber-border);
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .tag-custom button { font-size: 14px; line-height: 1; padding: 0 0 0 2px; color: inherit; }
+  .tag-input-row { display: flex; gap: 6px; }
+  .tag-input-row input { flex: 1; padding: 6px 10px; font-size: 13px; border: 1px solid var(--line); border-radius: 8px; outline: none; }
+  .tag-add-btn {
+    padding: 6px 14px; background: var(--ink); color: var(--bg);
+    border-radius: 8px; font-size: 13px;
+  }
+
+  /* Stars input */
+  .stars-input { display: flex; align-items: center; gap: 4px; }
+  .star-btn { transition: transform 0.1s; padding: 2px; }
+  .star-btn:hover { transform: scale(1.15); }
+  .clear-rating { font-size: 11px; color: var(--ink-mute); text-decoration: underline; margin-left: 8px; }
+
+  /* Photo upload */
+  .photo-upload {
+    width: 100%; padding: 30px; border: 2px dashed var(--line);
+    border-radius: 8px; transition: all 0.15s;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    color: var(--ink-soft);
+  }
+  .photo-upload:hover { border-color: var(--ink-soft); background: rgba(0,0,0,0.02); }
+  .photo-preview { position: relative; display: inline-block; }
+  .photo-preview img { max-height: 200px; border-radius: 8px; border: 1px solid var(--line); }
+  .photo-preview-remove {
+    position: absolute; top: 8px; right: 8px;
+    background: rgba(28,25,23,0.8); color: white;
+    border-radius: 999px; padding: 4px;
+  }
+
+  /* Alert box */
+  .alert-input {
+    border-color: var(--amber-border) !important;
+    background: rgba(253, 230, 138, 0.15) !important;
+  }
+  .alert-input:focus { border-color: var(--amber-text) !important; }
+
+  /* Detail */
+  .detail-photo { aspect-ratio: 16/10; background: var(--line-soft); border-radius: 10px 10px 0 0; overflow: hidden; }
+  .detail-photo img { width: 100%; height: 100%; object-fit: cover; }
+  .detail-body { padding: 22px; }
+  .detail-title { font-size: 28px; font-weight: 700; margin: 0 0 4px; line-height: 1.15; }
+  .detail-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .detail-row { display: flex; gap: 10px; padding: 4px 0; font-size: 14px; }
+  .detail-row-label { font-weight: 600; color: var(--ink-soft); width: 72px; flex-shrink: 0; font-size: 13px; }
+  .detail-row a { color: #1d4ed8; text-decoration: none; }
+  .detail-row a:hover { text-decoration: underline; }
+  .detail-notes {
+    border-top: 1px solid var(--line-soft); padding-top: 14px; margin-top: 14px;
+    font-style: italic; color: var(--ink); line-height: 1.6; white-space: pre-wrap;
+  }
+  .detail-alerts {
+    border-top: 1px solid var(--line-soft); padding-top: 14px; margin-top: 14px;
+  }
+  .detail-alerts-box {
+    background: var(--amber-bg); border: 1px solid var(--amber-border);
+    border-radius: 8px; padding: 12px; display: flex; gap: 10px; align-items: flex-start;
+  }
+  .detail-alerts-title {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em;
+    color: var(--amber-text); font-weight: 700; margin-bottom: 4px;
+  }
+  .detail-alerts-text { font-size: 14px; color: var(--amber-text); white-space: pre-wrap; line-height: 1.6; }
+  .detail-created { font-size: 11px; color: var(--ink-mute); font-style: italic; margin-top: 14px; }
+
+  .detail-actions {
+    display: flex; gap: 6px; flex-wrap: wrap;
+  }
+  .detail-action-btn {
+    padding: 7px 12px; border-radius: 8px; font-size: 13px;
+    display: inline-flex; align-items: center; gap: 5px;
+    transition: background 0.15s;
+  }
+  .detail-action-btn.share { color: var(--ink-soft); }
+  .detail-action-btn.share:hover { background: rgba(0,0,0,0.06); }
+  .detail-action-btn.edit { background: var(--ink); color: var(--bg); }
+  .detail-action-btn.edit:hover { background: #44403c; }
+
+  /* Map */
+  .map-card { background: var(--paper); border: 1px solid var(--line-soft); border-radius: 10px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+  .map-card iframe { display: block; }
+  .map-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; margin-top: 14px; }
+  .map-item {
+    background: var(--paper); border: 1px solid var(--line-soft); border-radius: 8px;
+    padding: 10px 12px; display: flex; gap: 10px; align-items: center;
+    transition: box-shadow 0.15s; text-align: left;
+  }
+  .map-item:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .map-item-name { font-weight: 600; font-size: 14px; }
+  .map-item-loc { font-size: 11px; color: var(--ink-mute); }
+  .map-item-link { font-size: 11px; color: var(--ink-soft); text-decoration: underline; white-space: nowrap; }
+
+  /* Share modal */
+  .share-options { display: grid; gap: 10px; }
+  .share-option {
+    padding: 14px; border: 1px solid var(--line); border-radius: 8px;
+    background: var(--paper); display: flex; gap: 12px; align-items: flex-start;
+    text-align: left; transition: all 0.15s;
+  }
+  .share-option:hover { border-color: var(--ink); transform: translateY(-1px); }
+  .share-option-icon {
+    width: 36px; height: 36px; border-radius: 8px; background: var(--bg2);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .share-option-text { flex: 1; }
+  .share-option-title { font-weight: 700; font-size: 14px; margin-bottom: 2px; }
+  .share-option-desc { font-size: 12px; color: var(--ink-soft); font-style: italic; }
+  .qr-container {
+    background: white; padding: 16px; border-radius: 8px; text-align: center;
+    border: 1px solid var(--line); margin-top: 12px;
+  }
+  .qr-container canvas, .qr-container svg { display: block; margin: 0 auto; max-width: 100%; }
+  .copy-text-area {
+    width: 100%; min-height: 200px; padding: 12px;
+    border: 1px solid var(--line); border-radius: 8px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12px;
+    background: #fafaf9; line-height: 1.5; resize: vertical;
+  }
+  .copy-btn {
+    margin-top: 10px; padding: 8px 16px; background: var(--ink); color: var(--bg);
+    border-radius: 8px; font-size: 13px; display: inline-flex; align-items: center; gap: 6px;
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+    background: var(--ink); color: var(--bg);
+    padding: 10px 18px; border-radius: 999px;
+    font-size: 13px; box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    z-index: 1000; animation: toastIn 0.3s ease-out;
+  }
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+  }
+
+  /* Print */
+  @media print {
+    .header-actions, .filters, .modal-backdrop, .toast, .detail-actions, .modal-footer { display: none !important; }
+    body { background: white !important; }
+    .card { break-inside: avoid; box-shadow: none !important; border: 1px solid #ccc !important; }
+    .stat-card { break-inside: avoid; }
+    @page { margin: 1.5cm; }
+  }
+
+  /* Mobile */
+  @media (max-width: 600px) {
+    .title { font-size: 28px; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .grid { grid-template-columns: 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+    .modal { margin: 10px 0; }
+    .modal-body { padding: 16px; }
+    .header-inner { padding: 20px 14px 18px; }
+    .container { padding: 14px; }
+  }
+
+  /* Hidden file input */
+  .hidden { display: none; }
+
+  /* ===== Sync Status ===== */
+  #syncBtn { position: relative; }
+  #syncBtn::after {
+    content: ''; position: absolute; top: 6px; right: 6px;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--ink-mute);
+    transition: background 0.2s;
+  }
+  #syncBtn.sync-ok::after { background: #22c55e; }
+  #syncBtn.sync-syncing::after { background: #f59e0b; animation: pulse 1s infinite; }
+  #syncBtn.sync-error::after { background: #ef4444; }
+  #syncBtn.sync-pending::after { background: #f59e0b; }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* Settings modal */
+  .settings-section {
+    border-top: 1px solid var(--line-soft);
+    padding-top: 16px; margin-top: 16px;
+  }
+  .settings-section:first-child { border-top: none; padding-top: 0; margin-top: 0; }
+  .settings-section h4 {
+    font-size: 13px; font-weight: 700; margin-bottom: 4px; color: var(--ink);
+  }
+  .settings-section p {
+    font-size: 12px; color: var(--ink-soft); margin-bottom: 10px; line-height: 1.5;
+  }
+  .settings-section a { color: #1d4ed8; text-decoration: underline; }
+  .settings-status-line {
+    background: #f5f5f4; border-radius: 6px; padding: 10px 12px;
+    font-size: 12px; color: var(--ink-soft); margin-bottom: 10px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .settings-status-line.ok { background: #ecfdf5; color: var(--emerald-text); }
+  .settings-status-line.error { background: #fef2f2; color: #b91c1c; }
+  .settings-status-line.warn { background: #fffbeb; color: var(--amber-text); }
+  .settings-row { display: flex; gap: 8px; align-items: stretch; margin-top: 6px; }
+  .settings-row input { flex: 1; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; font-size: 13px; outline: none; font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+  .settings-row input:focus { border-color: var(--ink); }
+  .settings-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .settings-actions button {
+    padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 500;
+    border: 1px solid var(--line); background: var(--paper);
+    transition: all 0.15s;
+  }
+  .settings-actions button:hover { background: #f5f5f4; }
+  .settings-actions button.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  .settings-actions button.primary:hover { background: #44403c; }
+  .settings-actions button.danger { color: #dc2626; }
+  .settings-actions button.danger:hover { background: #fef2f2; border-color: #fecaca; }
+
+  /* Sub-action buttons */
+  .small-action-btn {
+    font-size: 12px; padding: 6px 10px; border-radius: 6px;
+    border: 1px solid var(--line); background: var(--paper);
+    display: inline-flex; align-items: center; gap: 4px;
+    transition: all 0.15s;
+  }
+  .small-action-btn:hover { border-color: var(--ink-soft); background: #fafaf9; }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="header-top">
+      <div>
+        <h1 class="title">Carnet de Cuisine</h1>
+        <p class="subtitle">my personal restaurant journal · 美食筆記</p>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" id="syncBtn" title="同步狀態">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        </button>
+        <button class="icon-btn" id="settingsBtn" title="同步設定">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+        <label class="icon-btn" title="匯入 JSON">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <input type="file" accept=".json" id="importInput" class="hidden">
+        </label>
+        <button class="icon-btn" id="exportBtn" title="匯出 JSON">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        </button>
+        <button class="icon-btn" id="printBtn" title="列印 / 存成 PDF">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        </button>
+        <button class="btn-primary" id="addBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          新增餐廳
+        </button>
+      </div>
+    </div>
+
+    <div class="stats" id="stats"></div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="filters">
+    <div class="search-wrap">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="searchInput" class="search" placeholder="搜尋餐廳、筆記、標籤、地區…">
+    </div>
+    <select id="filterCity" class="filter-select"></select>
+    <select id="filterTag" class="filter-select"></select>
+    <div class="view-toggle">
+      <button id="viewList" class="active">清單</button>
+      <button id="viewMap">地圖</button>
+    </div>
+  </div>
+
+  <div id="content"></div>
+</div>
+
+<!-- Modal Container -->
+<div id="modalRoot"></div>
+
+<!-- Toast Container -->
+<div id="toastRoot"></div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+// ===================== Firebase =====================
+const firebaseConfig = {
+  apiKey: "AIzaSyCAomToi3JtSYjOtEt49wgVEVQ9VfCe32M",
+  authDomain: "quick-capture-6f954.firebaseapp.com",
+  projectId: "quick-capture-6f954",
+  storageBucket: "quick-capture-6f954.firebasestorage.app",
+  messagingSenderId: "729180119317",
+  appId: "1:729180119317:web:b0e2556fa4884bd0dc091c"
+};
+const fbApp = initializeApp(firebaseConfig);
+const db = getFirestore(fbApp);
+const FB_COL = 'restaurants';
+const localPhotos = {}; // photos stored only locally (too large for Firestore)
+
+function setSyncStatus(s, label) {
+  const btn = document.getElementById('syncBtn');
+  if (!btn) return;
+  btn.classList.remove('sync-ok', 'sync-syncing', 'sync-error', 'sync-pending');
+  if (s === 'ok') btn.classList.add('sync-ok');
+  else if (s === 'syncing') btn.classList.add('sync-syncing');
+  else if (s === 'error') btn.classList.add('sync-error');
+  btn.title = label || s;
+}
+
+async function fbSave(restaurant) {
+  const { photo, ...data } = restaurant;
+  if (photo) localPhotos[restaurant.id] = photo;
+  setSyncStatus('syncing', '同步中…');
+  try {
+    await setDoc(doc(db, FB_COL, restaurant.id), { ...data, _ts: serverTimestamp() });
+    setSyncStatus('ok', '已同步');
+  } catch(e) {
+    console.error('Firestore save error:', e);
+    setSyncStatus('error', '同步失敗：' + e.message);
+  }
+}
+
+async function fbDelete(id) {
+  delete localPhotos[id];
+  setSyncStatus('syncing', '同步中…');
+  try {
+    await deleteDoc(doc(db, FB_COL, id));
+    setSyncStatus('ok', '已同步');
+  } catch(e) {
+    setSyncStatus('error', '同步失敗：' + e.message);
+  }
+}
+
+window.addEventListener('online', () => setSyncStatus('syncing', '重新連線…'));
+window.addEventListener('offline', () => setSyncStatus('error', '離線中'));
+
+// ===================== 資料層 =====================
+const STORAGE_KEY = 'restaurants-data-v1';
+
+// ===================== Sync Manager (stub) =====================
+const Sync = {
+  config: null,         // { token, gistId }
+  status: 'idle',       // 'idle' | 'syncing' | 'ok' | 'error' | 'pending' | 'unset'
+  lastError: null,
+  lastSyncAt: null,
+  saveTimer: null,
+
+  init() {
+    try {
+      const raw = localStorage.getItem(SYNC_CONFIG_KEY);
+      if (raw) this.config = JSON.parse(raw);
+    } catch (e) {}
+    this.updateStatus(this.config ? 'idle' : 'unset');
+  },
+
+  hasConfig() {
+    return !!(this.config && this.config.token && this.config.gistId);
+  },
+
+  setConfig(token, gistId) {
+    this.config = { token: token.trim(), gistId: gistId.trim() };
+    localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(this.config));
+    this.updateStatus('idle');
+  },
+
+  clearConfig() {
+    this.config = null;
+    localStorage.removeItem(SYNC_CONFIG_KEY);
+    localStorage.removeItem(SYNC_PENDING_KEY);
+    this.updateStatus('unset');
+  },
+
+  updateStatus(s, err = null) {
+    this.status = s;
+    this.lastError = err;
+    const btn = document.getElementById('syncBtn');
+    if (btn) {
+      btn.classList.remove('sync-ok', 'sync-syncing', 'sync-error', 'sync-pending');
+      if (s === 'ok') btn.classList.add('sync-ok');
+      else if (s === 'syncing') btn.classList.add('sync-syncing');
+      else if (s === 'error') btn.classList.add('sync-error');
+      else if (s === 'pending') btn.classList.add('sync-pending');
+      btn.title = this.statusText();
+    }
+  },
+
+  statusText() {
+    if (this.status === 'unset') return '未設定同步（點此設定）';
+    if (this.status === 'syncing') return '同步中…';
+    if (this.status === 'ok') return `已同步${this.lastSyncAt ? '（' + new Date(this.lastSyncAt).toLocaleTimeString('zh-TW') + '）' : ''}`;
+    if (this.status === 'error') return '同步失敗：' + (this.lastError || '未知錯誤');
+    if (this.status === 'pending') return '離線變更等待上傳';
+    return '同步閒置中';
+  },
+
+  markPending() {
+    localStorage.setItem(SYNC_PENDING_KEY, '1');
+    this.updateStatus('pending');
+  },
+
+  clearPending() {
+    localStorage.removeItem(SYNC_PENDING_KEY);
+  },
+
+  hasPending() {
+    return localStorage.getItem(SYNC_PENDING_KEY) === '1';
+  },
+
+  // 從 Gist 拉取整份資料（回傳 { restaurants: [...], wantlist: [...] }）
+  async pull() {
+    if (!this.hasConfig()) throw new Error('未設定同步');
+    const r = await fetch(`https://api.github.com/gists/${this.config.gistId}`, {
+      headers: {
+        'Authorization': `token ${this.config.token}`,
+        'Accept': 'application/vnd.github+json'
+      }
+    });
+    if (!r.ok) {
+      if (r.status === 401) throw new Error('Token 無效或已過期');
+      if (r.status === 404) throw new Error('Gist ID 找不到');
+      throw new Error(`GitHub API 錯誤 (${r.status})`);
+    }
+    const data = await r.json();
+    const file = data.files['data.json'];
+    if (!file) return { restaurants: [], wantlist: [] };
+    try {
+      const content = JSON.parse(file.content);
+      return {
+        restaurants: Array.isArray(content.restaurants) ? content.restaurants : [],
+        wantlist: Array.isArray(content.wantlist) ? content.wantlist : []
+      };
+    } catch (e) {
+      return { restaurants: [], wantlist: [] };
+    }
+  },
+
+  // 推送整份資料到 Gist
+  async push(remoteData) {
+    if (!this.hasConfig()) throw new Error('未設定同步');
+    const r = await fetch(`https://api.github.com/gists/${this.config.gistId}`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `token ${this.config.token}`,
+        'Accept': 'application/vnd.github+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        files: {
+          'data.json': { content: JSON.stringify(remoteData, null, 2) }
+        }
+      })
+    });
+    if (!r.ok) {
+      throw new Error(`推送失敗 (${r.status})`);
+    }
+  },
+
+  // 將遠端與本地資料合併（id 同則取 updatedAt 較新者；否則保留兩邊）
+  mergeArrays(local, remote) {
+    const map = new Map();
+    [...local, ...remote].forEach(item => {
+      if (!item || !item.id) return;
+      const existing = map.get(item.id);
+      if (!existing) {
+        map.set(item.id, item);
+      } else {
+        const a = item.updatedAt || item.createdAt || '';
+        const b = existing.updatedAt || existing.createdAt || '';
+        map.set(item.id, a > b ? item : existing);
+      }
+    });
+    // 移除遠端已刪除的（如果本地沒被改過）：略，採保守策略，只合併不刪
+    // 處理刪除：如果 item 帶 _deleted: true 則保留標記但從清單剔除
+    const result = [...map.values()].filter(x => !x._deleted);
+    // 排序：按 createdAt 倒序
+    result.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+    return result;
+  },
+
+  // 同步流程：拉 → 合併 → 推
+  async sync(localData) {
+    if (!this.hasConfig()) {
+      this.updateStatus('unset');
+      return null;
+    }
+    if (this.status === 'syncing') return null; // 防止重入
+    this.updateStatus('syncing');
+    try {
+      const remote = await this.pull();
+      const merged = {
+        restaurants: this.mergeArrays(localData.restaurants || [], remote.restaurants || []),
+        wantlist: this.mergeArrays(localData.wantlist || [], remote.wantlist || [])
+      };
+      // 只有資料有變化才推送
+      const changed = JSON.stringify(merged) !== JSON.stringify(remote);
+      if (changed) await this.push(merged);
+      this.lastSyncAt = Date.now();
+      this.clearPending();
+      this.updateStatus('ok');
+      return merged;
+    } catch (e) {
+      console.error('Sync error:', e);
+      this.markPending();
+      this.updateStatus('error', e.message);
+      return null;
+    }
+  },
+
+  // 防抖式同步：多次呼叫合併成一次
+  scheduleSync(getDataFn, onMerged) {
+    if (!this.hasConfig()) return;
+    if (!navigator.onLine) {
+      this.markPending();
+      return;
+    }
+    clearTimeout(this.saveTimer);
+    this.saveTimer = setTimeout(async () => {
+      const merged = await this.sync(getDataFn());
+      if (merged && onMerged) onMerged(merged);
+    }, 800);
+  },
+
+  // 立即同步（用於開啟時、手動觸發）
+  async syncNow(getDataFn, onMerged) {
+    const merged = await this.sync(getDataFn());
+    if (merged && onMerged) onMerged(merged);
+    return merged;
+  }
+};
+
+// 監聽連線狀態：上線後自動補推
+window.addEventListener('online', () => {
+  if (Sync.hasPending() && Sync.hasConfig()) {
+    Sync.scheduleSync(() => ({ restaurants: state.restaurants }), (merged) => {
+      state.restaurants = merged.restaurants;
+      saveDataLocal();
+      render();
+      toast('離線變更已同步');
+    });
+  }
+});
+
+const STATUS_CONFIG = {
+  wishlist: { label: '想吃', cls: 'wishlist', icon: '♡' },
+  visited: { label: '已吃', cls: 'visited', icon: '✓' },
+  recommend: { label: '推薦', cls: 'recommend', icon: '⭐' }
+};
+
+const PRESET_TAGS = ['日式', '中式', '台菜', '西餐', '韓式', '泰式', '越南菜', '義式', '法式', '咖啡', '甜點', '早午餐', '夜市', '街頭小吃', '燒烤', '火鍋', '素食', '海鮮', '麵包烘焙', '酒吧'];
+
+const CURRENCIES = ['TWD', 'JPY', 'USD', 'EUR', 'KRW', 'CNY', 'HKD', 'THB', 'SGD', 'GBP', 'AUD'];
+const CURRENCY_SYMBOLS = {
+  TWD: 'NT$', JPY: '¥', USD: '$', EUR: '€', KRW: '₩',
+  CNY: '¥', HKD: 'HK$', THB: '฿', SGD: 'S$', GBP: '£', AUD: 'A$'
+};
+
+function formatPrice(amount, currency) {
+  if (!amount) return '';
+  const symbol = CURRENCY_SYMBOLS[currency] || '';
+  if (currency === 'JPY' || currency === 'KRW') return `${symbol}${amount}`;
+  return `${symbol}${amount}${currency ? ` ${currency}` : ''}`;
+}
+
+function extractCoordsFromUrl(url) {
+  if (!url) return null;
+  const patterns = [
+    /@(-?\d+\.\d+),(-?\d+\.\d+)/,
+    /[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/,
+    /!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/,
+    /[?&]ll=(-?\d+\.\d+),(-?\d+\.\d+)/,
+    /[?&]center=(-?\d+\.\d+),(-?\d+\.\d+)/,
+    /#map=\d+\/(-?\d+\.\d+)\/(-?\d+\.\d+)/,
+  ];
+  for (const p of patterns) {
+    const m = url.match(p);
+    if (m) return { lat: parseFloat(m[1]), lng: parseFloat(m[2]) };
+  }
+  return null;
+}
+
+function escapeHtml(str) {
+  if (str == null) return '';
+  return String(str).replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
+// ===================== 狀態 =====================
+let state = {
+  restaurants: [],
+  filterStatus: 'all',
+  filterCity: 'all',
+  filterTag: 'all',
+  searchTerm: '',
+  viewMode: 'list',
+};
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) state.restaurants = JSON.parse(raw);
+  } catch (e) {
+    console.error('Load failed', e);
+  }
+}
+
+// 純本地儲存（不觸發同步）
+function saveDataLocal() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state.restaurants));
+  } catch (e) {
+    alert('儲存失敗：' + e.message + '\n\n可能是空間已滿，請先匯出資料備份再清理。');
+  }
+}
+
+// 儲存到本地（Firebase 同步由 fbSave/fbDelete 各自處理）
+function saveData() {
+  saveDataLocal();
+}
+
+function toast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.getElementById('toastRoot').appendChild(t);
+  setTimeout(() => t.remove(), 2200);
+}
+
+// ===================== 渲染 =====================
+function getFilteredRestaurants() {
+  return state.restaurants.filter(r => {
+    if (r._deleted) return false;
+    if (state.filterStatus !== 'all' && r.status !== state.filterStatus) return false;
+    if (state.filterCity !== 'all' && r.city !== state.filterCity) return false;
+    if (state.filterTag !== 'all' && !(r.tags || []).includes(state.filterTag)) return false;
+    if (state.searchTerm) {
+      const t = state.searchTerm.toLowerCase();
+      return (r.name || '').toLowerCase().includes(t) ||
+             (r.notes || '').toLowerCase().includes(t) ||
+             (r.alerts || '').toLowerCase().includes(t) ||
+             (r.tags || []).some(x => x.toLowerCase().includes(t)) ||
+             (r.district || '').toLowerCase().includes(t);
+    }
+    return true;
+  });
+}
+
+function renderStats() {
+  const active = state.restaurants.filter(r => !r._deleted);
+  const stats = {
+    all: active.length,
+    wishlist: active.filter(r => r.status === 'wishlist').length,
+    visited: active.filter(r => r.status === 'visited').length,
+    recommend: active.filter(r => r.status === 'recommend').length,
+  };
+  const labels = { all: '全部', wishlist: '想吃', visited: '已吃', recommend: '推薦' };
+  const html = ['all', 'wishlist', 'visited', 'recommend'].map(k => `
+    <button class="stat-card ${state.filterStatus === k ? 'active' : ''}" data-status="${k}">
+      <div class="stat-num">${stats[k]}</div>
+      <div class="stat-label">${labels[k]}</div>
+    </button>
+  `).join('');
+  document.getElementById('stats').innerHTML = html;
+  document.querySelectorAll('.stat-card').forEach(el => {
+    el.addEventListener('click', () => {
+      state.filterStatus = el.dataset.status;
+      render();
+    });
+  });
+}
+
+function renderFilterSelects() {
+  const cities = [...new Set(state.restaurants.map(r => r.city).filter(Boolean))].sort();
+  const tags = [...new Set(state.restaurants.flatMap(r => r.tags || []))].sort();
+
+  const citySel = document.getElementById('filterCity');
+  citySel.innerHTML = '<option value="all">全部城市</option>' +
+    cities.map(c => `<option value="${escapeHtml(c)}" ${state.filterCity === c ? 'selected' : ''}>${escapeHtml(c)}</option>`).join('');
+
+  const tagSel = document.getElementById('filterTag');
+  tagSel.innerHTML = '<option value="all">全部標籤</option>' +
+    tags.map(t => `<option value="${escapeHtml(t)}" ${state.filterTag === t ? 'selected' : ''}>${escapeHtml(t)}</option>`).join('');
+}
+
+function renderStarsHtml(rating) {
+  if (!rating) return '';
+  let html = '<span class="stars">';
+  for (let i = 1; i <= 5; i++) {
+    html += `<span class="star ${i <= rating ? 'filled' : ''}">★</span>`;
+  }
+  html += '</span>';
+  return html;
+}
+
+function renderCard(r) {
+  const cfg = STATUS_CONFIG[r.status] || STATUS_CONFIG.wishlist;
+  const price = formatPrice(r.priceAmount, r.priceCurrency);
+  return `
+    <button class="card" data-id="${r.id}">
+      ${r.photo ? `<div class="card-photo"><img src="${r.photo}" alt=""></div>` : ''}
+      <div class="card-body">
+        <div class="card-top">
+          <h3 class="card-name">${escapeHtml(r.name)}</h3>
+          <span class="status-pill status-${cfg.cls}">${cfg.icon} ${cfg.label}</span>
+        </div>
+        <div class="card-meta">
+          ${price ? `<span style="font-weight:600">${escapeHtml(price)}</span>` : ''}
+          ${renderStarsHtml(r.rating)}
+          ${r.visitDate ? `<span style="font-size:12px;color:var(--ink-mute)">📅 ${escapeHtml(r.visitDate)}</span>` : ''}
+        </div>
+        ${r.tags && r.tags.length ? `
+          <div class="card-tags">
+            ${r.tags.slice(0,3).map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('')}
+            ${r.tags.length > 3 ? `<span class="tag">+${r.tags.length - 3}</span>` : ''}
+          </div>` : ''}
+        ${r.notes ? `<div class="card-notes">${escapeHtml(r.notes)}</div>` : ''}
+        ${r.alerts ? `
+          <div class="card-alert">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span>${escapeHtml(r.alerts)}</span>
+          </div>` : ''}
+        ${r.district ? `<div class="card-district">📍 ${escapeHtml(r.district)}</div>` : ''}
+      </div>
+    </button>
+  `;
+}
+
+function renderListView(filtered) {
+  if (filtered.length === 0) {
+    return `
+      <div class="empty">
+        <div class="empty-icon">🍽️</div>
+        <h3>${state.restaurants.length === 0 ? '開始你的美食筆記' : '沒有符合條件的餐廳'}</h3>
+        <p>${state.restaurants.length === 0 ? '記錄想吃的、吃過的、想推薦的餐廳' : '試試調整篩選條件'}</p>
+        ${state.restaurants.length === 0 ? '<button class="btn-primary" onclick="openForm()">新增第一間餐廳</button>' : ''}
+      </div>
+    `;
+  }
+
+  const grouped = {};
+  filtered.forEach(r => {
+    const c = r.city || '未分類';
+    if (!grouped[c]) grouped[c] = [];
+    grouped[c].push(r);
+  });
+
+  return Object.keys(grouped).sort().map(city => `
+    <div class="city-group">
+      <div class="city-header">
+        <h2 class="city-name">${escapeHtml(city)}</h2>
+        <span class="city-count">${grouped[city].length} 間</span>
+      </div>
+      <div class="grid">
+        ${grouped[city].map(renderCard).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderMapView(filtered) {
+  const withCoords = filtered.map(r => {
+    const c = extractCoordsFromUrl(r.mapUrl);
+    return c ? { ...r, lat: c.lat, lng: c.lng } : null;
+  }).filter(Boolean);
+
+  if (withCoords.length === 0) {
+    return `
+      <div class="empty">
+        <div class="empty-icon">🗺️</div>
+        <h3>沒有可顯示的地點</h3>
+        <p>編輯餐廳並加入 Google Maps 連結就能在地圖上顯示</p>
+      </div>
+    `;
+  }
+
+  const lats = withCoords.map(r => r.lat);
+  const lngs = withCoords.map(r => r.lng);
+  const minLat = Math.min(...lats), maxLat = Math.max(...lats);
+  const minLng = Math.min(...lngs), maxLng = Math.max(...lngs);
+  const padding = Math.max(maxLat - minLat, maxLng - minLng) * 0.3 || 0.01;
+  const bbox = `${minLng - padding},${minLat - padding},${maxLng + padding},${maxLat + padding}`;
+  const centerLat = (minLat + maxLat) / 2, centerLng = (minLng + maxLng) / 2;
+
+  return `
+    <div class="map-card">
+      <iframe width="100%" height="500" style="border:0" src="https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${centerLat},${centerLng}"></iframe>
+    </div>
+    <div class="map-list">
+      ${withCoords.map(r => `
+        <button class="map-item" data-id="${r.id}">
+          <span style="font-size:18px">📍</span>
+          <div style="flex:1;min-width:0">
+            <div class="map-item-name">${escapeHtml(r.name)}</div>
+            <div class="map-item-loc">${escapeHtml([r.city, r.district].filter(Boolean).join(' · ') || '—')}</div>
+          </div>
+          <a href="${escapeHtml(r.mapUrl)}" target="_blank" rel="noopener" class="map-item-link" onclick="event.stopPropagation()">開啟 ↗</a>
+        </button>
+      `).join('')}
+    </div>
+  `;
+}
+
+function render() {
+  renderStats();
+  renderFilterSelects();
+
+  const filtered = getFilteredRestaurants();
+  const content = state.viewMode === 'list' ? renderListView(filtered) : renderMapView(filtered);
+  document.getElementById('content').innerHTML = content;
+
+  // 卡片點擊
+  document.querySelectorAll('.card, .map-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const r = state.restaurants.find(x => x.id === el.dataset.id);
+      if (r) openDetail(r);
+    });
+  });
+
+  // 視圖切換
+  document.getElementById('viewList').classList.toggle('active', state.viewMode === 'list');
+  document.getElementById('viewMap').classList.toggle('active', state.viewMode === 'map');
+}
+
+// ===================== 表單 =====================
+function openForm(initial = null) {
+  const root = document.getElementById('modalRoot');
+  const isEdit = !!initial;
+  const data = initial || {
+    name: '', city: '', district: '', mapUrl: '', status: 'wishlist',
+    priceAmount: '', priceCurrency: 'TWD', visitDate: '', rating: 0,
+    tags: [], notes: '', alerts: '', photo: ''
+  };
+
+  root.innerHTML = `
+    <div class="modal-backdrop" id="formBackdrop">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-header">
+          <h2 class="modal-title">${isEdit ? '編輯餐廳' : '新增餐廳'}</h2>
+          <button class="icon-btn" id="formCloseBtn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">餐廳名稱 *</label>
+            <input class="form-input" id="f_name" type="text" placeholder="例：鼎泰豐" value="${escapeHtml(data.name)}">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">狀態</label>
+            <div class="status-buttons" id="f_status_btns"></div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">城市 *</label>
+              <input class="form-input" id="f_city" type="text" list="cityList" placeholder="例：台北、東京" value="${escapeHtml(data.city)}">
+              <datalist id="cityList"></datalist>
+            </div>
+            <div class="form-group">
+              <label class="form-label">地區</label>
+              <input class="form-input" id="f_district" type="text" list="districtList" placeholder="例：信義區、澀谷" value="${escapeHtml(data.district)}">
+              <datalist id="districtList"></datalist>
+              <div class="form-help" id="f_district_hint"></div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">地圖連結</label>
+            <input class="form-input" id="f_mapUrl" type="url" placeholder="貼上 Google Maps 連結" value="${escapeHtml(data.mapUrl)}">
+            <div class="form-help" id="f_mapHelp"></div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">造訪日期</label>
+              <input class="form-input" id="f_visitDate" type="date" value="${escapeHtml(data.visitDate)}">
+            </div>
+            <div class="form-group">
+              <label class="form-label">每人預算</label>
+              <div style="display:flex;gap:6px">
+                <input class="form-input" id="f_priceAmount" type="number" min="0" step="any" placeholder="500" value="${escapeHtml(data.priceAmount)}" style="flex:1">
+                <select class="form-select" id="f_priceCurrency" style="width:auto">
+                  ${CURRENCIES.map(c => `<option value="${c}" ${data.priceCurrency === c ? 'selected' : ''}>${CURRENCY_SYMBOLS[c]} ${c}</option>`).join('')}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">評分</label>
+            <div class="stars-input" id="f_stars"></div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">標籤</label>
+            <div class="tag-list" id="f_presetTags"></div>
+            <div class="tag-list" id="f_customTags"></div>
+            <div class="tag-input-row">
+              <input id="f_customTagInput" type="text" placeholder="自訂標籤…">
+              <button type="button" class="tag-add-btn" id="f_customTagAdd">加入</button>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">照片</label>
+            <div id="f_photoArea"></div>
+            <input type="file" accept="image/*" id="f_photoInput" class="hidden">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">筆記</label>
+            <textarea class="form-textarea" id="f_notes" rows="3" placeholder="推薦菜色、用餐心得、同行人…">${escapeHtml(data.notes)}</textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">注意事項<span class="form-hint">訂位資訊、用餐提醒</span></label>
+            <textarea class="form-textarea alert-input" id="f_alerts" rows="3" placeholder="例：需提前 7 天訂位、週一公休、低消 NT$300、僅收現金…">${escapeHtml(data.alerts)}</textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-secondary" id="formCancel">取消</button>
+          <button class="btn-primary" id="formSubmit">${isEdit ? '儲存修改' : '新增餐廳'}</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // 表單狀態
+  let formState = { ...data, tags: [...data.tags] };
+
+  // 狀態按鈕
+  function renderStatusBtns() {
+    const html = Object.entries(STATUS_CONFIG).map(([k, cfg]) => `
+      <button type="button" class="status-btn ${formState.status === k ? 'active ' + cfg.cls : ''}" data-status="${k}">
+        ${cfg.icon} ${cfg.label}
+      </button>
+    `).join('');
+    document.getElementById('f_status_btns').innerHTML = html;
+    document.querySelectorAll('#f_status_btns .status-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        formState.status = btn.dataset.status;
+        renderStatusBtns();
+      });
+    });
+  }
+  renderStatusBtns();
+
+  // 城市/地區 datalist
+  const cities = [...new Set(state.restaurants.map(r => r.city).filter(Boolean))].sort();
+  const districtsByCity = {};
+  state.restaurants.forEach(r => {
+    if (r.city && r.district) {
+      if (!districtsByCity[r.city]) districtsByCity[r.city] = new Set();
+      districtsByCity[r.city].add(r.district);
+    }
+  });
+  const allDistricts = [...new Set(state.restaurants.map(r => r.district).filter(Boolean))].sort();
+
+  document.getElementById('cityList').innerHTML = cities.map(c => `<option value="${escapeHtml(c)}">`).join('');
+
+  function updateDistrictList() {
+    const c = document.getElementById('f_city').value.trim();
+    const list = (c && districtsByCity[c]) ? [...districtsByCity[c]].sort() : allDistricts;
+    document.getElementById('districtList').innerHTML = list.map(d => `<option value="${escapeHtml(d)}">`).join('');
+    const hint = document.getElementById('f_district_hint');
+    if (c && districtsByCity[c]) {
+      const arr = [...districtsByCity[c]].sort();
+      hint.textContent = `${c} 已有：${arr.slice(0,5).join('、')}${arr.length > 5 ? '…' : ''}`;
+    } else {
+      hint.textContent = '';
+    }
+    document.getElementById('f_district').placeholder = c ? `${c}的地區…` : '例：信義區、澀谷';
+  }
+  document.getElementById('f_city').addEventListener('input', updateDistrictList);
+  updateDistrictList();
+
+  // 地圖連結預覽
+  function updateMapHelp() {
+    const url = document.getElementById('f_mapUrl').value.trim();
+    const coords = extractCoordsFromUrl(url);
+    const help = document.getElementById('f_mapHelp');
+    if (coords) {
+      help.className = 'form-help ok';
+      help.textContent = `✓ 已偵測座標：${coords.lat.toFixed(4)}, ${coords.lng.toFixed(4)}`;
+    } else if (url) {
+      help.className = 'form-help warn';
+      help.textContent = '⚠ 此連結無法解析座標，但仍會儲存';
+    } else {
+      help.className = 'form-help';
+      help.textContent = '提示：在 Google Maps 點分享 → 複製連結';
+    }
+  }
+  document.getElementById('f_mapUrl').addEventListener('input', updateMapHelp);
+  updateMapHelp();
+
+  // 評分
+  function renderStarsInput() {
+    const html = [1,2,3,4,5].map(i => `
+      <button type="button" class="star-btn" data-star="${i}">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="${i <= formState.rating ? '#fbbf24' : 'none'}" stroke="${i <= formState.rating ? '#fbbf24' : 'var(--line)'}" stroke-width="2">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+        </svg>
+      </button>
+    `).join('');
+    document.getElementById('f_stars').innerHTML = html + (formState.rating > 0 ? '<button type="button" class="clear-rating" id="f_clearStars">清除</button>' : '');
+    document.querySelectorAll('#f_stars .star-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const v = parseInt(btn.dataset.star);
+        formState.rating = formState.rating === v ? 0 : v;
+        renderStarsInput();
+      });
+    });
+    const clr = document.getElementById('f_clearStars');
+    if (clr) clr.addEventListener('click', () => { formState.rating = 0; renderStarsInput(); });
+  }
+  renderStarsInput();
+
+  // 標籤
+  function renderTags() {
+    const presetHtml = PRESET_TAGS.map(tag => `
+      <button type="button" class="tag-btn ${formState.tags.includes(tag) ? 'active' : ''}" data-tag="${escapeHtml(tag)}">${escapeHtml(tag)}</button>
+    `).join('');
+    document.getElementById('f_presetTags').innerHTML = presetHtml;
+    document.querySelectorAll('#f_presetTags .tag-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const t = btn.dataset.tag;
+        if (formState.tags.includes(t)) formState.tags = formState.tags.filter(x => x !== t);
+        else formState.tags.push(t);
+        renderTags();
+      });
+    });
+
+    const customs = formState.tags.filter(t => !PRESET_TAGS.includes(t));
+    document.getElementById('f_customTags').innerHTML = customs.map(t => `
+      <span class="tag-custom">${escapeHtml(t)} <button type="button" data-remove="${escapeHtml(t)}">×</button></span>
+    `).join('');
+    document.querySelectorAll('#f_customTags button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        formState.tags = formState.tags.filter(x => x !== btn.dataset.remove);
+        renderTags();
+      });
+    });
+  }
+  renderTags();
+
+  document.getElementById('f_customTagAdd').addEventListener('click', () => {
+    const input = document.getElementById('f_customTagInput');
+    const t = input.value.trim();
+    if (t && !formState.tags.includes(t)) {
+      formState.tags.push(t);
+      input.value = '';
+      renderTags();
+    }
+  });
+  document.getElementById('f_customTagInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      document.getElementById('f_customTagAdd').click();
+    }
+  });
+
+  // 照片
+  function renderPhoto() {
+    const area = document.getElementById('f_photoArea');
+    if (formState.photo) {
+      area.innerHTML = `
+        <div class="photo-preview">
+          <img src="${formState.photo}" alt="">
+          <button type="button" class="photo-preview-remove" id="f_photoRemove">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      `;
+      document.getElementById('f_photoRemove').addEventListener('click', () => {
+        formState.photo = '';
+        renderPhoto();
+      });
+    } else {
+      area.innerHTML = `
+        <button type="button" class="photo-upload" id="f_photoBtn">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          <span style="font-size:13px">點擊上傳照片（最大 2MB）</span>
+        </button>
+      `;
+      document.getElementById('f_photoBtn').addEventListener('click', () => {
+        document.getElementById('f_photoInput').click();
+      });
+    }
+  }
+  renderPhoto();
+
+  document.getElementById('f_photoInput').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      alert('圖片過大，請選小於 2MB');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const maxW = 800;
+        const scale = Math.min(1, maxW / img.width);
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        formState.photo = canvas.toDataURL('image/jpeg', 0.8);
+        renderPhoto();
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+
+  // 提交
+  function close() {
+    document.getElementById('modalRoot').innerHTML = '';
+  }
+  document.getElementById('formCloseBtn').addEventListener('click', close);
+  document.getElementById('formCancel').addEventListener('click', close);
+  document.getElementById('formBackdrop').addEventListener('click', close);
+
+  document.getElementById('formSubmit').addEventListener('click', () => {
+    const name = document.getElementById('f_name').value.trim();
+    if (!name) { alert('請輸入餐廳名稱'); return; }
+
+    const newData = {
+      name,
+      city: document.getElementById('f_city').value.trim(),
+      district: document.getElementById('f_district').value.trim(),
+      mapUrl: document.getElementById('f_mapUrl').value.trim(),
+      status: formState.status,
+      priceAmount: document.getElementById('f_priceAmount').value.trim(),
+      priceCurrency: document.getElementById('f_priceAmount').value.trim() ? document.getElementById('f_priceCurrency').value : '',
+      visitDate: document.getElementById('f_visitDate').value,
+      rating: formState.rating,
+      tags: formState.tags,
+      notes: document.getElementById('f_notes').value.trim(),
+      alerts: document.getElementById('f_alerts').value.trim(),
+      photo: formState.photo
+    };
+
+    let savedItem;
+    if (isEdit) {
+      const idx = state.restaurants.findIndex(r => r.id === initial.id);
+      if (idx >= 0) {
+        state.restaurants[idx] = { ...state.restaurants[idx], ...newData, updatedAt: new Date().toISOString() };
+        savedItem = state.restaurants[idx];
+      }
+      toast('已儲存修改');
+    } else {
+      const now = new Date().toISOString();
+      savedItem = { id: Date.now().toString(), createdAt: now, updatedAt: now, ...newData };
+      state.restaurants.unshift(savedItem);
+      toast('已新增餐廳');
+    }
+
+    saveData();
+    if (savedItem) fbSave(savedItem);
+    close();
+    render();
+  });
+}
+
+// ===================== 詳情 =====================
+function openDetail(r) {
+  const cfg = STATUS_CONFIG[r.status] || STATUS_CONFIG.wishlist;
+  const price = formatPrice(r.priceAmount, r.priceCurrency);
+
+  const root = document.getElementById('modalRoot');
+  root.innerHTML = `
+    <div class="modal-backdrop" id="detailBackdrop">
+      <div class="modal" onclick="event.stopPropagation()">
+        ${r.photo ? `<div class="detail-photo"><img src="${r.photo}" alt=""></div>` : ''}
+        <div class="detail-body">
+          <div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start">
+            <div>
+              <h2 class="detail-title">${escapeHtml(r.name)}</h2>
+              <div class="detail-meta">
+                <span class="status-pill status-${cfg.cls}">${cfg.icon} ${cfg.label}</span>
+                ${price ? `<span style="font-weight:600;font-size:14px">${escapeHtml(price)}</span>` : ''}
+                ${renderStarsHtml(r.rating)}
+              </div>
+            </div>
+            <button class="icon-btn" id="detailClose">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>
+
+          <div>
+            ${r.city ? `<div class="detail-row"><span class="detail-row-label">城市</span><span>${escapeHtml(r.city)}</span></div>` : ''}
+            ${r.district ? `<div class="detail-row"><span class="detail-row-label">地區</span><span>${escapeHtml(r.district)}</span></div>` : ''}
+            ${r.mapUrl ? `<div class="detail-row"><span class="detail-row-label">地圖</span><a href="${escapeHtml(r.mapUrl)}" target="_blank" rel="noopener">開啟地圖 ↗</a></div>` : ''}
+            ${r.visitDate ? `<div class="detail-row"><span class="detail-row-label">造訪日期</span><span>📅 ${escapeHtml(r.visitDate)}</span></div>` : ''}
+            ${price ? `<div class="detail-row"><span class="detail-row-label">每人預算</span><span>${escapeHtml(price)}</span></div>` : ''}
+            ${r.tags && r.tags.length ? `
+              <div class="detail-row">
+                <span class="detail-row-label">標籤</span>
+                <div style="display:flex;flex-wrap:wrap;gap:4px">
+                  ${r.tags.map(t => `<span class="tag">${escapeHtml(t)}</span>`).join('')}
+                </div>
+              </div>` : ''}
+            ${r.notes ? `<div class="detail-notes">「${escapeHtml(r.notes)}」</div>` : ''}
+            ${r.alerts ? `
+              <div class="detail-alerts">
+                <div class="detail-alerts-box">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:2px;color:var(--amber-text)"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  <div>
+                    <div class="detail-alerts-title">注意事項</div>
+                    <div class="detail-alerts-text">${escapeHtml(r.alerts)}</div>
+                  </div>
+                </div>
+              </div>` : ''}
+            ${r.createdAt ? `<div class="detail-created">記錄於 ${new Date(r.createdAt).toLocaleDateString('zh-TW')}</div>` : ''}
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-danger" id="detailDelete">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            刪除
+          </button>
+          <div class="detail-actions">
+            <button class="detail-action-btn share" id="detailShare">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+              分享
+            </button>
+            <button class="detail-action-btn edit" id="detailEdit">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              編輯
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  function close() { document.getElementById('modalRoot').innerHTML = ''; }
+  document.getElementById('detailClose').addEventListener('click', close);
+  document.getElementById('detailBackdrop').addEventListener('click', close);
+  document.getElementById('detailDelete').addEventListener('click', async () => {
+    if (confirm('確定要刪除這間餐廳嗎？')) {
+      state.restaurants = state.restaurants.filter(x => x.id !== r.id);
+      saveDataLocal();
+      await fbDelete(r.id);
+      close();
+      render();
+      toast('已刪除');
+    }
+  });
+  document.getElementById('detailEdit').addEventListener('click', () => {
+    close();
+    openForm(r);
+  });
+  document.getElementById('detailShare').addEventListener('click', () => {
+    openShareModal(r);
+  });
+}
+
+// ===================== 分享 =====================
+function buildShareText(r) {
+  const cfg = STATUS_CONFIG[r.status] || STATUS_CONFIG.wishlist;
+  const price = formatPrice(r.priceAmount, r.priceCurrency);
+  const lines = [
+    `🍽️ ${r.name}`,
+    `${cfg.icon} ${cfg.label}`,
+    [r.city, r.district].filter(Boolean).join(' · '),
+    price ? `💰 ${price}` : '',
+    r.rating ? '⭐'.repeat(r.rating) : '',
+    r.visitDate ? `📅 造訪 ${r.visitDate}` : '',
+    r.tags && r.tags.length ? `🏷️ ${r.tags.join('、')}` : '',
+    r.notes ? `\n📝 ${r.notes}` : '',
+    r.alerts ? `\n⚠️ ${r.alerts}` : '',
+    r.mapUrl ? `\n🗺️ ${r.mapUrl}` : '',
+  ].filter(Boolean);
+  return lines.join('\n');
+}
+
+function openShareModal(r) {
+  const root = document.getElementById('modalRoot');
+  root.innerHTML = `
+    <div class="modal-backdrop" id="shareBackdrop">
+      <div class="modal" onclick="event.stopPropagation()" style="max-width:520px">
+        <div class="modal-header">
+          <h2 class="modal-title">分享：${escapeHtml(r.name)}</h2>
+          <button class="icon-btn" id="shareClose">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="share-options">
+            <button class="share-option" id="shareNative" ${navigator.share ? '' : 'style="display:none"'}>
+              <div class="share-option-icon">📱</div>
+              <div class="share-option-text">
+                <div class="share-option-title">系統分享</div>
+                <div class="share-option-desc">透過 LINE、訊息、AirDrop 等分享</div>
+              </div>
+            </button>
+            <button class="share-option" id="shareCopy">
+              <div class="share-option-icon">📋</div>
+              <div class="share-option-text">
+                <div class="share-option-title">複製成文字</div>
+                <div class="share-option-desc">貼到 LINE、訊息、社群</div>
+              </div>
+            </button>
+            <button class="share-option" id="shareQR">
+              <div class="share-option-icon">▦</div>
+              <div class="share-option-text">
+                <div class="share-option-title">產生 QR Code</div>
+                <div class="share-option-desc">面對面快速分享地圖連結</div>
+              </div>
+            </button>
+            <button class="share-option" id="shareMap" ${r.mapUrl ? '' : 'style="display:none"'}>
+              <div class="share-option-icon">🗺️</div>
+              <div class="share-option-text">
+                <div class="share-option-title">開啟地圖</div>
+                <div class="share-option-desc">直接跳轉到 Google Maps</div>
+              </div>
+            </button>
+          </div>
+          <div id="shareResult" style="margin-top:16px"></div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  function close() { document.getElementById('modalRoot').innerHTML = ''; }
+  document.getElementById('shareClose').addEventListener('click', close);
+  document.getElementById('shareBackdrop').addEventListener('click', close);
+
+  const text = buildShareText(r);
+
+  document.getElementById('shareNative')?.addEventListener('click', async () => {
+    try {
+      await navigator.share({ title: r.name, text });
+      close();
+    } catch (e) {
+      // 用戶取消，不顯示錯誤
+    }
+  });
+
+  document.getElementById('shareCopy').addEventListener('click', () => {
+    const result = document.getElementById('shareResult');
+    result.innerHTML = `
+      <textarea class="copy-text-area" id="copyArea">${escapeHtml(text)}</textarea>
+      <button class="copy-btn" id="doCopy">📋 複製到剪貼簿</button>
+    `;
+    document.getElementById('doCopy').addEventListener('click', async () => {
+      const ta = document.getElementById('copyArea');
+      try {
+        await navigator.clipboard.writeText(ta.value);
+        toast('已複製到剪貼簿');
+      } catch (e) {
+        ta.select();
+        document.execCommand('copy');
+        toast('已複製到剪貼簿');
+      }
+    });
+  });
+
+  document.getElementById('shareQR').addEventListener('click', () => {
+    const url = r.mapUrl || ('data:text/plain,' + encodeURIComponent(text));
+    const result = document.getElementById('shareResult');
+    // 使用 QR Server API（公開免費）
+    const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(url)}`;
+    result.innerHTML = `
+      <div class="qr-container">
+        <img src="${qrSrc}" alt="QR Code" style="max-width:240px">
+        <div style="font-size:12px;color:var(--ink-mute);margin-top:10px;font-style:italic">
+          ${r.mapUrl ? '掃描可直接開啟地圖位置' : '掃描可看到餐廳資訊'}
+        </div>
+      </div>
+    `;
+  });
+
+  document.getElementById('shareMap')?.addEventListener('click', () => {
+    if (r.mapUrl) window.open(r.mapUrl, '_blank');
+  });
+}
+
+// ===================== 匯出/匯入 =====================
+function exportData() {
+  const dataStr = JSON.stringify(state.restaurants, null, 2);
+  const blob = new Blob([dataStr], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `restaurants-${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('已匯出 JSON');
+}
+
+function importData(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const imported = JSON.parse(e.target.result);
+      if (!Array.isArray(imported)) throw new Error('格式錯誤');
+      const choice = confirm(`找到 ${imported.length} 筆資料\n\n按【確定】= 取代現有資料\n按【取消】= 合併（避免重複）`);
+      if (choice) {
+        state.restaurants = imported;
+      } else {
+        // 合併：以 id 去重
+        const existingIds = new Set(state.restaurants.map(r => r.id));
+        const newOnes = imported.filter(r => !existingIds.has(r.id));
+        state.restaurants = [...newOnes, ...state.restaurants];
+      }
+      saveData();
+      // sync all items to Firebase
+      state.restaurants.forEach(r => fbSave(r));
+      render();
+      toast(choice ? '已取代資料（同步中…）' : '已合併資料（同步中…）');
+    } catch (err) {
+      alert('檔案格式錯誤：' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ===================== 同步設定 Modal (Firebase 版) =====================
+function openSyncSettings() {
+  toast('✅ 已使用 Firebase 即時同步，無需額外設定');
+  return;
+  const statusCls = '';
+
+  root.innerHTML = `
+    <div class="modal-backdrop" id="syncBackdrop">
+      <div class="modal" onclick="event.stopPropagation()" style="max-width:560px">
+        <div class="modal-header">
+          <h2 class="modal-title">☁️ 同步設定</h2>
+          <button class="icon-btn" id="syncSettingsClose">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="modal-body">
+
+          <div class="settings-status-line ${statusCls}">
+            <span>📡</span>
+            <span>${statusText}</span>
+          </div>
+
+          <div class="settings-section">
+            <h4>GitHub Personal Access Token</h4>
+            <p>
+              如果還沒建立，<a href="https://github.com/settings/tokens/new?scopes=gist&description=my-personal-tools" target="_blank" rel="noopener">點此前往 GitHub 建立</a>（只勾 gist 權限即可）。Token 只會儲存在你的瀏覽器中。
+            </p>
+            <div class="settings-row">
+              <input type="password" id="syncToken" placeholder="ghp_xxxxxxxxxxxxxxxx" value="${escapeHtml(cfg.token || '')}" autocomplete="new-password">
+              <button id="syncTogglePw" type="button" style="padding:0 12px;border:1px solid var(--line);border-radius:6px;background:var(--paper);font-size:12px">顯示</button>
+            </div>
+          </div>
+
+          <div class="settings-section">
+            <h4>Gist ID</h4>
+            <p>
+              你的 secret Gist 網址末段那串字。如果還沒建立，<a href="https://gist.github.com/" target="_blank" rel="noopener">點此前往 GitHub 建立</a>，檔名 <code>data.json</code>，內容貼 <code>{"restaurants":[],"wantlist":[]}</code>，記得選 <strong>Create secret gist</strong>。
+            </p>
+            <div class="settings-row">
+              <input type="text" id="syncGistId" placeholder="a1b2c3d4e5f6..." value="${escapeHtml(cfg.gistId || '')}" autocomplete="off">
+            </div>
+          </div>
+
+          <div class="settings-actions">
+            <button class="primary" id="syncSave">儲存並同步</button>
+            <button id="syncTest" ${!isSet ? 'disabled style="opacity:0.5"' : ''}>測試連線</button>
+            <button id="syncPullNow" ${!isSet ? 'disabled style="opacity:0.5"' : ''}>立即拉取</button>
+            <button class="danger" id="syncClear" ${!isSet ? 'disabled style="opacity:0.5"' : ''}>移除設定</button>
+          </div>
+
+          <div id="syncResult" style="margin-top:14px"></div>
+
+          <div class="settings-section" style="font-size:12px;color:var(--ink-soft)">
+            <h4 style="font-size:12px;font-weight:600">運作說明</h4>
+            <p style="font-size:12px">
+              • 設定完成後，新增 / 編輯 / 刪除會自動同步到 Gist<br>
+              • 開啟頁面時會自動從 Gist 拉最新資料合併<br>
+              • 同一個 Gist 同時存放餐廳與購物清單，兩個工具共用設定<br>
+              • 離線時可正常使用，連線後自動補上同步<br>
+              • 衝突處理：以最後修改時間較新者為準
+            </p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  `;
+
+  function close() { document.getElementById('modalRoot').innerHTML = ''; }
+  document.getElementById('syncSettingsClose').addEventListener('click', close);
+  document.getElementById('syncBackdrop').addEventListener('click', close);
+
+  // 顯示/隱藏密碼
+  document.getElementById('syncTogglePw').addEventListener('click', () => {
+    const inp = document.getElementById('syncToken');
+    const btn = document.getElementById('syncTogglePw');
+    if (inp.type === 'password') {
+      inp.type = 'text';
+      btn.textContent = '隱藏';
+    } else {
+      inp.type = 'password';
+      btn.textContent = '顯示';
+    }
+  });
+
+  // 儲存
+  document.getElementById('syncSave').addEventListener('click', async () => {
+    const token = document.getElementById('syncToken').value.trim();
+    const gistId = document.getElementById('syncGistId').value.trim();
+    if (!token || !gistId) {
+      showSyncResult('error', '請填寫 Token 和 Gist ID');
+      return;
+    }
+    Sync.setConfig(token, gistId);
+    showSyncResult('info', '正在測試連線並同步…');
+    const merged = await Sync.syncNow(
+      () => ({ restaurants: state.restaurants }),
+      (m) => {
+        state.restaurants = m.restaurants;
+        saveDataLocal();
+        render();
+      }
+    );
+    if (merged) {
+      showSyncResult('ok', `✓ 同步成功！從 Gist 取得 ${merged.restaurants.length} 筆餐廳資料`);
+      setTimeout(close, 1500);
+    } else {
+      showSyncResult('error', `✗ 同步失敗：${Sync.lastError || '未知錯誤'}`);
+    }
+  });
+
+  // 測試連線
+  document.getElementById('syncTest').addEventListener('click', async () => {
+    showSyncResult('info', '測試中…');
+    try {
+      const remote = await Sync.pull();
+      showSyncResult('ok', `✓ 連線成功！Gist 中有餐廳 ${remote.restaurants.length} 筆，購物清單 ${remote.wantlist.length} 筆`);
+    } catch (e) {
+      showSyncResult('error', `✗ 連線失敗：${e.message}`);
+    }
+  });
+
+  // 立即拉取
+  document.getElementById('syncPullNow').addEventListener('click', async () => {
+    if (!confirm('立即從 Gist 拉取最新資料合併？')) return;
+    showSyncResult('info', '同步中…');
+    const merged = await Sync.syncNow(
+      () => ({ restaurants: state.restaurants }),
+      (m) => {
+        state.restaurants = m.restaurants;
+        saveDataLocal();
+        render();
+      }
+    );
+    if (merged) {
+      showSyncResult('ok', `✓ 已合併，目前共有 ${merged.restaurants.length} 筆餐廳資料`);
+    } else {
+      showSyncResult('error', `✗ 同步失敗：${Sync.lastError || '未知錯誤'}`);
+    }
+  });
+
+  // 移除設定
+  document.getElementById('syncClear').addEventListener('click', () => {
+    if (!confirm('確定要移除同步設定嗎？\n\n本地資料不會被刪除，但會停止與 Gist 的同步。')) return;
+    Sync.clearConfig();
+    showSyncResult('info', '已移除設定');
+    setTimeout(() => openSyncSettings(), 600);
+  });
+}
+
+function showSyncResult(kind, msg) {
+  const el = document.getElementById('syncResult');
+  if (!el) return;
+  const colors = {
+    ok: 'background:#ecfdf5;color:#047857;border:1px solid #a7f3d0',
+    error: 'background:#fef2f2;color:#b91c1c;border:1px solid #fecaca',
+    info: 'background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe'
+  };
+  el.innerHTML = `<div style="padding:10px 12px;border-radius:6px;font-size:13px;${colors[kind] || ''}">${escapeHtml(msg)}</div>`;
+}
+
+// ===================== 事件綁定 =====================
+document.getElementById('addBtn').addEventListener('click', () => openForm());
+document.getElementById('exportBtn').addEventListener('click', exportData);
+document.getElementById('printBtn').addEventListener('click', () => {
+  toast('列印對話框開啟中…可選擇「儲存為 PDF」');
+  setTimeout(() => window.print(), 300);
+});
+document.getElementById('importInput').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (file) importData(file);
+  e.target.value = '';
+});
+
+// 同步按鈕：顯示 Firebase 狀態
+document.getElementById('settingsBtn').addEventListener('click', () => {
+  const btn = document.getElementById('syncBtn');
+  const ok = btn.classList.contains('sync-ok');
+  toast(ok ? `✅ Firebase 即時同步中 (${state.restaurants.length} 間餐廳)` : '🔄 同步中，請稍候…');
+});
+document.getElementById('syncBtn').addEventListener('click', () => {
+  const btn = document.getElementById('syncBtn');
+  const ok = btn.classList.contains('sync-ok');
+  toast(ok ? `✅ 已即時同步 (${state.restaurants.length} 筆)` : '🔄 連線中…');
+});
+
+document.getElementById('searchInput').addEventListener('input', (e) => {
+  state.searchTerm = e.target.value;
+  render();
+});
+document.getElementById('filterCity').addEventListener('change', (e) => {
+  state.filterCity = e.target.value;
+  render();
+});
+document.getElementById('filterTag').addEventListener('change', (e) => {
+  state.filterTag = e.target.value;
+  render();
+});
+document.getElementById('viewList').addEventListener('click', () => { state.viewMode = 'list'; render(); });
+document.getElementById('viewMap').addEventListener('click', () => { state.viewMode = 'map'; render(); });
+
+// ESC 關閉 modal
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    document.getElementById('modalRoot').innerHTML = '';
+  }
+});
+
+// ===================== 初始化 =====================
+loadData(); // 先顯示本地快取
+render();
+setSyncStatus('syncing', '連線中…');
+
+// Firebase 即時同步監聽
+onSnapshot(collection(db, FB_COL), snapshot => {
+  const docs = snapshot.docs.map(d => {
+    const { _ts, ...rest } = d.data();
+    return { ...rest, photo: localPhotos[rest.id || d.id] || rest.photo || '' };
+  });
+  docs.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+  state.restaurants = docs;
+  saveDataLocal();
+  render();
+  setSyncStatus('ok', `已同步 (${docs.length} 間餐廳)`);
+}, err => {
+  setSyncStatus('error', '連線失敗：' + err.code);
+  console.error('Firestore error:', err);
+});
+
+// expose to window for inline onclick
+window.openForm = openForm;
+</script>
+</body>
+</html>
