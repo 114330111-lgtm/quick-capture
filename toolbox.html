@@ -1,0 +1,2249 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<meta name="theme-color" content="#0f172a">
+<title>My Toolbox · 知識工具箱</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧰</text></svg>">
+<style>
+  :root {
+    --bg: #0f172a;
+    --bg2: #1e293b;
+    --surface: #1e293b;
+    --surface-hover: #334155;
+    --line: #334155;
+    --line-soft: #475569;
+    --text: #f1f5f9;
+    --text-mute: #94a3b8;
+    --text-soft: #cbd5e1;
+
+    --accent: #60a5fa;        /* 主題藍 */
+    --accent-soft: #1e40af;
+    --green: #4ade80;
+    --yellow: #fbbf24;
+    --orange: #fb923c;
+    --pink: #f472b6;
+    --red: #f87171;
+    --purple: #a78bfa;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #f8fafc;
+      --bg2: #f1f5f9;
+      --surface: #ffffff;
+      --surface-hover: #f8fafc;
+      --line: #e2e8f0;
+      --line-soft: #cbd5e1;
+      --text: #0f172a;
+      --text-mute: #64748b;
+      --text-soft: #334155;
+      --accent: #2563eb;
+      --accent-soft: #dbeafe;
+    }
+  }
+
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang TC", "Noto Sans TC", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  input, select, textarea { font-family: inherit; font-size: 14px; color: var(--text); }
+  input::placeholder, textarea::placeholder { color: var(--text-mute); }
+
+  /* ===== Header ===== */
+  .header {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--line);
+    position: sticky; top: 0; z-index: 30;
+    backdrop-filter: blur(10px);
+  }
+  .header-inner {
+    max-width: 1100px; margin: 0 auto;
+    padding: 14px 16px;
+    display: flex; justify-content: space-between; align-items: center;
+    gap: 12px;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .brand-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--purple) 100%);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+  .brand-text {
+    font-size: 18px; font-weight: 800; letter-spacing: -0.01em;
+  }
+  .brand-sub {
+    font-size: 11px; color: var(--text-mute); letter-spacing: 0.05em;
+  }
+
+  .header-actions { display: flex; gap: 4px; align-items: center; }
+  .icon-btn {
+    width: 36px; height: 36px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-mute);
+    transition: all 0.15s;
+    position: relative;
+  }
+  .icon-btn:hover { background: var(--surface-hover); color: var(--text); }
+  .icon-btn.active { background: var(--accent-soft); color: var(--accent); }
+
+  /* sync indicator */
+  #syncBtn::after {
+    content: ''; position: absolute; top: 6px; right: 6px;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--text-mute);
+  }
+  #syncBtn.sync-ok::after { background: var(--green); }
+  #syncBtn.sync-syncing::after { background: var(--yellow); animation: pulse 1s infinite; }
+  #syncBtn.sync-error::after { background: var(--red); }
+  #syncBtn.sync-pending::after { background: var(--orange); }
+  @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  /* ===== 快速擷取輸入框 ===== */
+  .capture-box {
+    max-width: 900px; margin: 16px auto;
+    padding: 0 16px;
+  }
+  .capture-card {
+    background: var(--surface);
+    border: 2px solid var(--line);
+    border-radius: 14px;
+    padding: 14px;
+    transition: border-color 0.2s;
+  }
+  .capture-card:focus-within {
+    border-color: var(--accent);
+  }
+  .capture-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.5;
+    resize: none;
+    outline: none;
+    min-height: 56px;
+    font-family: inherit;
+  }
+  .capture-actions {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-top: 10px; padding-top: 10px;
+    border-top: 1px dashed var(--line);
+  }
+  .capture-tools {
+    display: flex; gap: 6px;
+  }
+  .tool-btn {
+    padding: 7px 10px; border-radius: 8px;
+    background: var(--bg2);
+    color: var(--text-mute);
+    font-size: 12px;
+    display: inline-flex; align-items: center; gap: 5px;
+    transition: all 0.15s;
+    border: 1px solid transparent;
+  }
+  .tool-btn:hover { color: var(--text); background: var(--surface-hover); }
+  .tool-btn.active { color: var(--accent); border-color: var(--accent); }
+
+  .capture-submit {
+    background: var(--accent);
+    color: white;
+    padding: 9px 18px;
+    border-radius: 8px;
+    font-size: 14px; font-weight: 600;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: all 0.15s;
+  }
+  .capture-submit:hover { transform: translateY(-1px); }
+  .capture-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .capture-save {
+    background: var(--bg2);
+    color: var(--text-soft);
+    padding: 9px 14px;
+    border-radius: 8px;
+    font-size: 14px; font-weight: 500;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: all 0.15s;
+    border: 1px solid var(--line);
+  }
+  .capture-save:hover { background: var(--surface-hover); color: var(--text); }
+  .capture-save:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* 圖片預覽 */
+  .image-previews {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-top: 10px;
+  }
+  .image-preview-item {
+    width: 80px; height: 80px;
+    border-radius: 8px; overflow: hidden;
+    position: relative;
+    border: 1px solid var(--line);
+  }
+  .image-preview-item img {
+    width: 100%; height: 100%; object-fit: cover;
+  }
+  .image-preview-remove {
+    position: absolute; top: 2px; right: 2px;
+    background: rgba(0,0,0,0.7); color: white;
+    width: 18px; height: 18px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; line-height: 1;
+  }
+
+  /* ===== Filters ===== */
+  .filters-bar {
+    max-width: 900px; margin: 0 auto;
+    padding: 0 16px 12px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .search-wrap {
+    position: relative;
+  }
+  .search-wrap svg {
+    position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+    color: var(--text-mute); pointer-events: none;
+  }
+  .search {
+    width: 100%; padding: 10px 12px 10px 38px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    outline: none;
+    font-size: 14px;
+  }
+  .search:focus { border-color: var(--accent); }
+
+  .category-pills {
+    display: flex; gap: 6px; overflow-x: auto;
+    padding: 4px 0;
+    scrollbar-width: none;
+  }
+  .category-pills::-webkit-scrollbar { display: none; }
+  .pill {
+    padding: 6px 12px; border-radius: 999px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    color: var(--text-mute);
+    font-size: 13px; white-space: nowrap;
+    display: inline-flex; align-items: center; gap: 4px;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+  .pill:hover { color: var(--text); }
+  .pill.active {
+    background: var(--accent); color: white;
+    border-color: var(--accent);
+  }
+  .pill .pill-count {
+    font-size: 11px; opacity: 0.7;
+  }
+
+  /* ===== Items ===== */
+  .container {
+    max-width: 900px; margin: 0 auto;
+    padding: 0 16px 80px;
+  }
+
+  .item-list {
+    display: flex; flex-direction: column; gap: 10px;
+  }
+
+  .item {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+  }
+  .item:hover {
+    border-color: var(--line-soft);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  .item-header {
+    display: flex; justify-content: space-between;
+    align-items: flex-start; gap: 10px; margin-bottom: 8px;
+  }
+  .item-category {
+    font-size: 11px; padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .item-time {
+    font-size: 11px; color: var(--text-mute);
+    white-space: nowrap;
+  }
+
+  .item-title {
+    font-size: 15px; font-weight: 600;
+    line-height: 1.4; margin-bottom: 4px;
+    color: var(--text);
+  }
+  .item-summary {
+    font-size: 13px; color: var(--text-soft);
+    line-height: 1.5;
+    display: -webkit-box; -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical; overflow: hidden;
+  }
+
+  .item-link {
+    margin-top: 8px; padding: 8px 10px;
+    background: var(--bg2);
+    border-radius: 6px;
+    font-size: 12px; color: var(--accent);
+    display: flex; align-items: center; gap: 6px;
+    text-decoration: none;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .item-link:hover { background: var(--surface-hover); }
+
+  .item-images {
+    display: flex; gap: 6px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+  }
+  .item-image {
+    width: 80px; height: 80px;
+    border-radius: 6px;
+    border: 1px solid var(--line);
+    overflow: hidden;
+    background: var(--bg2);
+  }
+  .item-image img {
+    width: 100%; height: 100%; object-fit: cover;
+  }
+
+  .item-tags {
+    display: flex; flex-wrap: wrap; gap: 4px;
+    margin-top: 8px;
+  }
+  .item-tag {
+    font-size: 11px; padding: 2px 6px;
+    background: var(--bg2);
+    color: var(--text-mute);
+    border-radius: 4px;
+  }
+
+  .item-source {
+    font-size: 11px; color: var(--text-mute);
+    margin-top: 6px;
+  }
+
+  /* ===== Empty / Loading ===== */
+  .empty-state {
+    text-align: center; padding: 60px 20px;
+    color: var(--text-mute);
+  }
+  .empty-icon { font-size: 48px; margin-bottom: 12px; opacity: 0.6; }
+  .empty-state h3 { font-size: 16px; color: var(--text); margin-bottom: 6px; }
+  .empty-state p { font-size: 13px; }
+
+  .analyzing-banner {
+    background: var(--accent-soft);
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin: 16px 0;
+    font-size: 13px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .spinner {
+    width: 14px; height: 14px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ===== Modal ===== */
+  .modal-backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    z-index: 100;
+    display: flex; align-items: flex-start; justify-content: center;
+    padding: 16px;
+    overflow-y: auto;
+  }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    max-width: 580px; width: 100%;
+    margin: 20px 0;
+    overflow: hidden;
+    animation: modalIn 0.2s ease-out;
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .modal-header {
+    padding: 14px 18px;
+    display: flex; justify-content: space-between; align-items: center;
+    border-bottom: 1px solid var(--line);
+    position: sticky; top: 0; background: var(--surface); z-index: 1;
+  }
+  .modal-title {
+    font-size: 16px; font-weight: 700;
+  }
+  .modal-body { padding: 18px; }
+  .modal-footer {
+    padding: 12px 18px;
+    border-top: 1px solid var(--line);
+    display: flex; gap: 8px; justify-content: space-between;
+    background: var(--bg2);
+  }
+  .btn {
+    padding: 9px 16px; border-radius: 8px;
+    font-size: 14px; font-weight: 600;
+    transition: all 0.15s;
+  }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-secondary { color: var(--text-mute); }
+  .btn-secondary:hover { color: var(--text); background: var(--surface-hover); }
+  .btn-danger { color: var(--red); }
+  .btn-danger:hover { background: rgba(248,113,113,0.1); }
+
+  /* Detail */
+  .detail-section { margin-bottom: 16px; }
+  .detail-label {
+    font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.1em; color: var(--text-mute);
+    margin-bottom: 6px; font-weight: 600;
+  }
+  .detail-value {
+    font-size: 14px; line-height: 1.6; color: var(--text);
+    white-space: pre-wrap;
+  }
+  .detail-images {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-top: 6px;
+  }
+  .detail-image {
+    max-width: 200px; max-height: 200px;
+    border-radius: 8px; border: 1px solid var(--line);
+  }
+
+  /* Form */
+  .form-group { margin-bottom: 14px; }
+  .form-label {
+    font-size: 12px; font-weight: 600; color: var(--text-mute);
+    margin-bottom: 6px; display: block;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .form-input, .form-textarea, .form-select {
+    width: 100%; padding: 9px 12px;
+    background: var(--bg2);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    outline: none; font-size: 14px;
+    transition: border-color 0.15s;
+  }
+  .form-input:focus, .form-textarea:focus, .form-select:focus {
+    border-color: var(--accent);
+  }
+  .form-textarea { resize: vertical; min-height: 70px; font-family: inherit; }
+
+  .category-buttons {
+    display: flex; flex-wrap: wrap; gap: 6px;
+  }
+  .cat-btn {
+    padding: 7px 12px; border-radius: 8px;
+    background: var(--bg2);
+    border: 1px solid var(--line);
+    color: var(--text-mute);
+    font-size: 12px;
+    transition: all 0.15s;
+  }
+  .cat-btn:hover { color: var(--text); }
+  .cat-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+  .tag-input-row { display: flex; gap: 6px; }
+  .tag-input-row input { flex: 1; }
+  .tag-add-btn {
+    padding: 0 14px; background: var(--bg2);
+    border: 1px solid var(--line);
+    border-radius: 8px; font-size: 13px;
+    color: var(--text-soft);
+  }
+  .tag-add-btn:hover { background: var(--surface-hover); }
+
+  .tags-list {
+    display: flex; flex-wrap: wrap; gap: 4px;
+    margin-bottom: 6px;
+  }
+  .tag-chip {
+    font-size: 12px; padding: 3px 8px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-radius: 4px;
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .tag-chip button {
+    color: inherit; font-size: 14px; line-height: 1;
+    padding: 0 0 0 2px; opacity: 0.7;
+  }
+  .tag-chip button:hover { opacity: 1; }
+
+  /* Settings */
+  .settings-section {
+    border-top: 1px solid var(--line);
+    padding-top: 14px; margin-top: 14px;
+  }
+  .settings-section:first-child { border-top: none; padding-top: 0; margin-top: 0; }
+  .settings-section h4 {
+    font-size: 14px; margin-bottom: 4px;
+  }
+  .settings-section p {
+    font-size: 12px; color: var(--text-mute);
+    line-height: 1.6; margin-bottom: 8px;
+  }
+  .settings-section a { color: var(--accent); }
+  .settings-section code {
+    background: var(--bg2); padding: 1px 6px; border-radius: 4px;
+    font-family: ui-monospace, monospace; font-size: 12px;
+  }
+  .settings-row { display: flex; gap: 6px; }
+  .settings-row input {
+    flex: 1; padding: 8px 10px;
+    background: var(--bg2); border: 1px solid var(--line);
+    border-radius: 6px; color: var(--text);
+    font-family: ui-monospace, monospace; font-size: 12px;
+    outline: none;
+  }
+  .settings-status-line {
+    background: var(--bg2); padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 12px; color: var(--text-mute);
+    margin-bottom: 10px;
+  }
+  .settings-status-line.ok { color: var(--green); }
+  .settings-status-line.error { color: var(--red); }
+  .settings-status-line.warn { color: var(--orange); }
+  .settings-actions {
+    display: flex; gap: 6px; flex-wrap: wrap;
+    margin-top: 10px;
+  }
+  .settings-actions button {
+    padding: 7px 12px; border-radius: 6px;
+    background: var(--bg2); color: var(--text-soft);
+    border: 1px solid var(--line);
+    font-size: 12px;
+  }
+  .settings-actions button:hover { background: var(--surface-hover); }
+  .settings-actions button.primary { background: var(--accent); color: white; border-color: var(--accent); }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    background: var(--text); color: var(--bg);
+    padding: 10px 18px; border-radius: 999px;
+    font-size: 13px; z-index: 1000;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+    animation: toastIn 0.3s;
+  }
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+    to { opacity: 1; transform: translateX(-50%); }
+  }
+
+  /* Mobile */
+  @media (max-width: 600px) {
+    .header-inner { padding: 10px 12px; }
+    .brand-text { font-size: 16px; }
+    .brand-sub { display: none; }
+    .capture-box, .filters-bar, .container { padding-left: 12px; padding-right: 12px; }
+    .item-image { width: 60px; height: 60px; }
+    .modal { margin: 10px 0; }
+  }
+
+  .hidden { display: none !important; }
+
+  /* ===== Stats Panel ===== */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .stats-card {
+    background: var(--bg2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px;
+  }
+  .stats-card-label {
+    font-size: 11px; color: var(--text-mute);
+    text-transform: uppercase; letter-spacing: 0.08em;
+    margin-bottom: 4px;
+  }
+  .stats-card-value {
+    font-size: 24px; font-weight: 800;
+    line-height: 1; margin-bottom: 4px;
+  }
+  .stats-card-sub {
+    font-size: 11px; color: var(--text-mute);
+  }
+
+  .stats-bars {
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .stats-bar-row {
+    display: grid;
+    grid-template-columns: 100px 1fr 36px;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+  }
+  .stats-bar-label {
+    color: var(--text-soft);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .stats-bar-track {
+    height: 8px;
+    background: var(--bg2);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .stats-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--purple));
+    transition: width 0.4s ease;
+  }
+  .stats-bar-count {
+    font-size: 12px;
+    color: var(--text-mute);
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* 7 天活動圖 */
+  .stats-activity {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    height: 80px;
+    margin-top: 8px;
+  }
+  .stats-activity-day {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+  }
+  .stats-activity-bar {
+    width: 100%;
+    background: var(--accent);
+    border-radius: 3px 3px 0 0;
+    min-height: 3px;
+    transition: all 0.3s;
+    position: relative;
+  }
+  .stats-activity-bar.zero {
+    background: var(--line);
+    opacity: 0.5;
+  }
+  .stats-activity-bar:hover {
+    background: var(--purple);
+  }
+  .stats-activity-day-label {
+    font-size: 10px;
+    color: var(--text-mute);
+    font-variant-numeric: tabular-nums;
+  }
+  .stats-activity-day-count {
+    font-size: 9px;
+    color: var(--text);
+    font-weight: 600;
+    margin-top: 2px;
+  }
+
+  /* 摘要列表 */
+  .summary-section {
+    margin-bottom: 16px;
+  }
+  .summary-section-title {
+    font-size: 13px; font-weight: 700;
+    color: var(--text);
+    margin-bottom: 8px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .summary-section-count {
+    font-size: 11px;
+    color: var(--text-mute);
+    font-weight: 400;
+  }
+  .summary-list {
+    display: flex; flex-direction: column;
+    gap: 6px;
+  }
+  .summary-item {
+    background: var(--bg2);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 8px 10px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .summary-item:hover { background: var(--surface-hover); }
+  .summary-item-title {
+    font-size: 13px; font-weight: 500;
+    color: var(--text);
+    margin-bottom: 2px;
+    display: -webkit-box; -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .summary-item-meta {
+    font-size: 11px;
+    color: var(--text-mute);
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="brand-icon">🧰</div>
+      <div>
+        <div class="brand-text">My Toolbox</div>
+        <div class="brand-sub">知識工具箱 · Personal Knowledge Base</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" id="statsBtn" title="統計與趨勢">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      </button>
+      <button class="icon-btn" id="syncBtn" title="同步">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      </button>
+      <button class="icon-btn" id="settingsBtn" title="設定">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+      <label class="icon-btn" title="匯入">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <input type="file" accept=".json" id="importInput" class="hidden">
+      </label>
+      <button class="icon-btn" id="exportBtn" title="匯出">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- 快速擷取輸入框 -->
+<div class="capture-box">
+  <div class="capture-card">
+    <textarea id="captureInput" class="capture-input" placeholder="貼連結、文字或拖入圖片… 我會幫你分析並分類"></textarea>
+    <div id="imagePreviews" class="image-previews"></div>
+    <div class="capture-actions">
+      <div class="capture-tools">
+        <label class="tool-btn" id="addImageBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 19V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2z"/><polyline points="21 15 16 10 5 21"/><circle cx="8.5" cy="8.5" r="1.5"/></svg>
+          <span>圖片</span>
+          <input type="file" accept="image/*" multiple id="imageInput" class="hidden">
+        </label>
+        <button class="tool-btn" id="aiToggleBtn" title="切換 AI / 規則式分析">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          <span id="aiToggleLabel">規則式</span>
+        </button>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="capture-save" id="saveOnlyBtn" title="不分析，直接儲存原始內容">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          <span>直接存</span>
+        </button>
+        <button class="capture-submit" id="submitBtn" title="用 AI 或規則式分析後儲存">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span>分析並存</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 篩選 -->
+<div class="filters-bar">
+  <div class="search-wrap">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" id="searchInput" class="search" placeholder="搜尋內容、標籤、網址…">
+  </div>
+  <div class="category-pills" id="categoryPills"></div>
+</div>
+
+<div class="container">
+  <div id="content"></div>
+</div>
+
+<div id="modalRoot"></div>
+<div id="toastRoot"></div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+// ===================== Firebase =====================
+const firebaseConfig = {
+  apiKey: "AIzaSyCAomToi3JtSYjOtEt49wgVEVQ9VfCe32M",
+  authDomain: "quick-capture-6f954.firebaseapp.com",
+  projectId: "quick-capture-6f954",
+  storageBucket: "quick-capture-6f954.firebasestorage.app",
+  messagingSenderId: "729180119317",
+  appId: "1:729180119317:web:b0e2556fa4884bd0dc091c"
+};
+const fbApp = initializeApp(firebaseConfig);
+const db = getFirestore(fbApp);
+const FB_COL = 'toolbox';
+const localImages = {}; // images stored only locally (too large for Firestore)
+
+function setSyncStatus(s, label) {
+  const btn = document.getElementById('syncBtn');
+  if (!btn) return;
+  btn.classList.remove('sync-ok', 'sync-syncing', 'sync-error', 'sync-pending');
+  if (s === 'ok') btn.classList.add('sync-ok');
+  else if (s === 'syncing') btn.classList.add('sync-syncing');
+  else if (s === 'error') btn.classList.add('sync-error');
+  btn.title = label || s;
+}
+
+async function fbSave(item) {
+  const { images, ...data } = item;
+  if (images && images.length) localImages[item.id] = images;
+  setSyncStatus('syncing', '同步中…');
+  try {
+    await setDoc(doc(db, FB_COL, item.id), { ...data, _ts: serverTimestamp() });
+    setSyncStatus('ok', '已同步');
+  } catch(e) {
+    console.error('Firestore save error:', e);
+    setSyncStatus('error', '同步失敗：' + e.message);
+  }
+}
+
+async function fbDelete(id) {
+  delete localImages[id];
+  setSyncStatus('syncing', '同步中…');
+  try {
+    await deleteDoc(doc(db, FB_COL, id));
+    setSyncStatus('ok', '已同步');
+  } catch(e) {
+    setSyncStatus('error', '同步失敗：' + e.message);
+  }
+}
+
+window.addEventListener('online', () => setSyncStatus('syncing', '重新連線…'));
+window.addEventListener('offline', () => setSyncStatus('error', '離線中'));
+
+// ===================== 常數 =====================
+const STORAGE_KEY = 'toolbox-data-v1';
+const AI_KEY_KEY = 'claude-api-key-v1';
+const PREFER_AI_KEY = 'toolbox-prefer-ai-v1';
+
+const DEFAULT_CATEGORIES = [
+  { id: 'ai', label: 'AI 工具', emoji: '🤖' },
+  { id: 'running', label: '跑步運動', emoji: '🏃' },
+  { id: 'tools', label: '工具軟體', emoji: '🛠️' },
+  { id: 'research', label: '研究 / 影像醫學', emoji: '🔬' },
+  { id: 'finance', label: '財經投資', emoji: '💰' },
+  { id: 'food', label: '美食料理', emoji: '🍳' },
+  { id: 'travel', label: '旅行', emoji: '✈️' },
+  { id: 'reading', label: '閱讀文章', emoji: '📚' },
+  { id: 'other', label: '其他', emoji: '📦' }
+];
+
+// 規則式分類關鍵字
+const CATEGORY_KEYWORDS = {
+  ai: ['ai', '人工智慧', 'gpt', 'chatgpt', 'claude', 'gemini', 'llm', 'machine learning', '機器學習', '深度學習', 'prompt', 'midjourney', 'stable diffusion', 'openai', 'anthropic', '大語言模型', '生成式'],
+  running: ['跑步', '馬拉松', 'marathon', 'running', '配速', '心率', '訓練', '路跑', '半馬', '全馬', '5k', '10k', 'pace', 'garmin', '跑鞋', '跑者'],
+  tools: ['tool', '工具', 'app', '軟體', 'extension', '外掛', '生產力', 'productivity', 'notion', 'obsidian', 'figma', 'github'],
+  research: ['乳癌', 'breast', '影像', 'mammography', '放射', 'radiology', '研究', 'paper', '論文', 'imaging', 'BAC', 'density', 'screening', 'mri', 'ct', 'ultrasound'],
+  finance: ['股票', '投資', 'stock', '台股', '美股', 'etf', '基金', '財報', '半導體', 'tsmc', '台積電', '加密', 'crypto', '比特幣'],
+  food: ['食譜', '料理', 'recipe', 'cooking', '餐廳', '美食', '甜點', '烘焙', '咖啡'],
+  travel: ['旅行', '旅遊', 'travel', '日本', '韓國', '東京', '京都', '大阪', '景點', '攻略', 'tokyo', 'seoul'],
+  reading: ['文章', '部落格', 'blog', 'article', '專欄', 'medium', 'substack', '閱讀']
+};
+
+// ===================== 狀態 =====================
+let state = {
+  items: [],
+  filterCategory: 'all',
+  searchTerm: '',
+  pendingImages: [],     // base64 陣列
+  preferAI: localStorage.getItem(PREFER_AI_KEY) === '1',
+  hasApiKey: !!localStorage.getItem(AI_KEY_KEY),
+};
+
+// ===================== Sync Manager =====================
+const Sync = {
+  config: null,
+  status: 'idle',
+  lastError: null,
+  lastSyncAt: null,
+  saveTimer: null,
+
+  init() {
+    try {
+      const raw = localStorage.getItem(SYNC_CONFIG_KEY);
+      if (raw) this.config = JSON.parse(raw);
+    } catch (e) {}
+    this.updateStatus(this.config ? 'idle' : 'unset');
+  },
+
+  hasConfig() { return !!(this.config && this.config.token && this.config.gistId); },
+
+  setConfig(token, gistId) {
+    this.config = { token: token.trim(), gistId: gistId.trim() };
+    localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(this.config));
+    this.updateStatus('idle');
+  },
+
+  clearConfig() {
+    this.config = null;
+    localStorage.removeItem(SYNC_CONFIG_KEY);
+    localStorage.removeItem(SYNC_PENDING_KEY);
+    this.updateStatus('unset');
+  },
+
+  updateStatus(s, err = null) {
+    this.status = s;
+    this.lastError = err;
+    const btn = document.getElementById('syncBtn');
+    if (btn) {
+      btn.classList.remove('sync-ok', 'sync-syncing', 'sync-error', 'sync-pending');
+      if (s === 'ok') btn.classList.add('sync-ok');
+      else if (s === 'syncing') btn.classList.add('sync-syncing');
+      else if (s === 'error') btn.classList.add('sync-error');
+      else if (s === 'pending') btn.classList.add('sync-pending');
+      btn.title = this.statusText();
+    }
+  },
+
+  statusText() {
+    if (this.status === 'unset') return '未設定同步';
+    if (this.status === 'syncing') return '同步中…';
+    if (this.status === 'ok') return `已同步${this.lastSyncAt ? '（' + new Date(this.lastSyncAt).toLocaleTimeString('zh-TW') + '）' : ''}`;
+    if (this.status === 'error') return '同步失敗：' + (this.lastError || '');
+    if (this.status === 'pending') return '離線變更等待上傳';
+    return '同步閒置';
+  },
+
+  markPending() { localStorage.setItem(SYNC_PENDING_KEY, '1'); this.updateStatus('pending'); },
+  clearPending() { localStorage.removeItem(SYNC_PENDING_KEY); },
+  hasPending() { return localStorage.getItem(SYNC_PENDING_KEY) === '1'; },
+
+  async pull() {
+    if (!this.hasConfig()) throw new Error('未設定同步');
+    const r = await fetch(`https://api.github.com/gists/${this.config.gistId}`, {
+      headers: { 'Authorization': `token ${this.config.token}`, 'Accept': 'application/vnd.github+json' }
+    });
+    if (!r.ok) {
+      if (r.status === 401) throw new Error('Token 無效');
+      if (r.status === 404) throw new Error('Gist ID 找不到');
+      throw new Error(`API 錯誤 (${r.status})`);
+    }
+    const data = await r.json();
+    const file = data.files['data.json'];
+    if (!file) return { restaurants: [], wantlist: [], toolbox: [] };
+    try {
+      const content = JSON.parse(file.content);
+      return {
+        restaurants: Array.isArray(content.restaurants) ? content.restaurants : [],
+        wantlist: Array.isArray(content.wantlist) ? content.wantlist : [],
+        toolbox: Array.isArray(content.toolbox) ? content.toolbox : []
+      };
+    } catch (e) { return { restaurants: [], wantlist: [], toolbox: [] }; }
+  },
+
+  async push(remoteData) {
+    if (!this.hasConfig()) throw new Error('未設定同步');
+    const r = await fetch(`https://api.github.com/gists/${this.config.gistId}`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `token ${this.config.token}`,
+        'Accept': 'application/vnd.github+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ files: { 'data.json': { content: JSON.stringify(remoteData, null, 2) } } })
+    });
+    if (!r.ok) throw new Error(`推送失敗 (${r.status})`);
+  },
+
+  mergeArrays(local, remote) {
+    const map = new Map();
+    [...local, ...remote].forEach(item => {
+      if (!item || !item.id) return;
+      const existing = map.get(item.id);
+      if (!existing) map.set(item.id, item);
+      else {
+        const a = item.updatedAt || item.createdAt || '';
+        const b = existing.updatedAt || existing.createdAt || '';
+        map.set(item.id, a > b ? item : existing);
+      }
+    });
+    const result = [...map.values()].filter(x => !x._deleted);
+    result.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+    return result;
+  },
+
+  async sync(localData) {
+    if (!this.hasConfig()) { this.updateStatus('unset'); return null; }
+    if (this.status === 'syncing') return null;
+    this.updateStatus('syncing');
+    try {
+      const remote = await this.pull();
+      const merged = {
+        restaurants: remote.restaurants,
+        wantlist: remote.wantlist,
+        toolbox: this.mergeArrays(localData.toolbox || [], remote.toolbox || [])
+      };
+      const changed = JSON.stringify(merged) !== JSON.stringify(remote);
+      if (changed) await this.push(merged);
+      this.lastSyncAt = Date.now();
+      this.clearPending();
+      this.updateStatus('ok');
+      return merged;
+    } catch (e) {
+      console.error('Sync error:', e);
+      this.markPending();
+      this.updateStatus('error', e.message);
+      return null;
+    }
+  },
+
+  scheduleSync(getDataFn, onMerged) {
+    if (!this.hasConfig()) return;
+    if (!navigator.onLine) { this.markPending(); return; }
+    clearTimeout(this.saveTimer);
+    this.saveTimer = setTimeout(async () => {
+      const merged = await this.sync(getDataFn());
+      if (merged && onMerged) onMerged(merged);
+    }, 800);
+  },
+
+  async syncNow(getDataFn, onMerged) {
+    const merged = await this.sync(getDataFn());
+    if (merged && onMerged) onMerged(merged);
+    return merged;
+  }
+};
+
+// online/offline handled by Firebase SDK automatically
+
+// ===================== Utils =====================
+function escapeHtml(str) {
+  if (str == null) return '';
+  return String(str).replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) state.items = JSON.parse(raw);
+  } catch (e) { console.error(e); }
+}
+
+function saveDataLocal() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state.items)); }
+  catch (e) { alert('儲存失敗：' + e.message); }
+}
+
+function saveData() {
+  saveDataLocal();
+}
+
+function toast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.getElementById('toastRoot').appendChild(t);
+  setTimeout(() => t.remove(), 2200);
+}
+
+function timeAgo(iso) {
+  const then = new Date(iso).getTime();
+  const now = Date.now();
+  const sec = Math.floor((now - then) / 1000);
+  if (sec < 60) return '剛剛';
+  const min = Math.floor(sec / 60);
+  if (min < 60) return `${min} 分鐘前`;
+  const hr = Math.floor(min / 60);
+  if (hr < 24) return `${hr} 小時前`;
+  const day = Math.floor(hr / 24);
+  if (day < 30) return `${day} 天前`;
+  return new Date(iso).toLocaleDateString('zh-TW');
+}
+
+function extractUrls(text) {
+  const re = /(https?:\/\/[^\s\u4e00-\u9fa5]+)/g;
+  return text.match(re) || [];
+}
+
+function detectType(text, hasImages) {
+  const urls = extractUrls(text);
+  if (urls.length > 0) return 'link';
+  if (hasImages) return 'image';
+  return 'text';
+}
+
+// ===================== 規則式分析 =====================
+function ruleBasedAnalyze(text, urls) {
+  const lower = text.toLowerCase();
+
+  // 計算每個分類的關鍵字命中數
+  const scores = {};
+  for (const [cat, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
+    scores[cat] = keywords.filter(k => lower.includes(k.toLowerCase())).length;
+  }
+
+  // 從 URL 加權
+  if (urls.length > 0) {
+    const urlText = urls.join(' ').toLowerCase();
+    if (urlText.match(/(github|huggingface|openai|anthropic|claude|gpt)/)) scores.ai = (scores.ai || 0) + 3;
+    if (urlText.match(/(strava|garmin|nike\.com\/.+running)/)) scores.running = (scores.running || 0) + 3;
+    if (urlText.match(/(youtube\.com|medium\.com|substack)/)) scores.reading = (scores.reading || 0) + 1;
+    if (urlText.match(/(pubmed|nature|sciencedirect|radiology)/)) scores.research = (scores.research || 0) + 3;
+    if (urlText.match(/(yahoo.+stock|cnyes|bloomberg|investing)/)) scores.finance = (scores.finance || 0) + 3;
+  }
+
+  // 找最高分
+  let topCat = 'other';
+  let topScore = 0;
+  for (const [cat, score] of Object.entries(scores)) {
+    if (score > topScore) { topScore = score; topCat = cat; }
+  }
+
+  // 提取關鍵詞作標籤（非常簡單版：找出現頻率高的中英文詞）
+  const tags = [];
+  const seen = new Set();
+  for (const [cat, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
+    keywords.forEach(k => {
+      if (lower.includes(k.toLowerCase()) && !seen.has(k) && tags.length < 5) {
+        tags.push(k);
+        seen.add(k);
+      }
+    });
+  }
+
+  // 標題與摘要
+  const firstLine = text.split('\n')[0].slice(0, 80);
+  const title = firstLine || (urls[0] ? new URL(urls[0]).hostname : '無標題');
+  const summary = text.length > 200 ? text.slice(0, 200) + '…' : text;
+
+  return {
+    title,
+    summary,
+    category: topCat,
+    tags,
+    method: 'rule'
+  };
+}
+
+// ===================== AI 分析（呼叫 Claude API）=====================
+async function aiAnalyze(text, urls, images) {
+  const apiKey = localStorage.getItem(AI_KEY_KEY);
+  if (!apiKey) throw new Error('未設定 Claude API key');
+
+  const categoriesText = DEFAULT_CATEGORIES.map(c => `${c.id} (${c.label})`).join(', ');
+
+  const userPrompt = `請分析以下內容，回傳純 JSON 格式（不要加 markdown code block 或其他文字）：
+
+{
+  "title": "簡短標題（不超過 40 字）",
+  "summary": "重點摘要（150-300 字）",
+  "category": "從以下 id 中選一個最適合的：${categoriesText}",
+  "tags": ["3-5 個關鍵字標籤"]
+}
+
+內容：
+${text}
+${urls.length > 0 ? '\n相關連結：\n' + urls.join('\n') : ''}`;
+
+  const messages = [{
+    role: 'user',
+    content: images.length > 0
+      ? [
+          ...images.map(img => ({
+            type: 'image',
+            source: { type: 'base64', media_type: 'image/jpeg', data: img.split(',')[1] }
+          })),
+          { type: 'text', text: userPrompt }
+        ]
+      : userPrompt
+  }];
+
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1024,
+      messages
+    })
+  });
+
+  if (!response.ok) {
+    const err = await response.text();
+    throw new Error(`API 錯誤 (${response.status}): ${err.slice(0, 100)}`);
+  }
+
+  const data = await response.json();
+  const textBlock = data.content.find(c => c.type === 'text');
+  if (!textBlock) throw new Error('回應格式錯誤');
+
+  // 試圖解析 JSON
+  let parsed;
+  try {
+    const cleaned = textBlock.text.replace(/```json\s*|```\s*$/g, '').trim();
+    parsed = JSON.parse(cleaned);
+  } catch (e) {
+    throw new Error('AI 回應無法解析為 JSON');
+  }
+
+  return {
+    title: parsed.title || '無標題',
+    summary: parsed.summary || '',
+    category: parsed.category || 'other',
+    tags: Array.isArray(parsed.tags) ? parsed.tags.slice(0, 5) : [],
+    method: 'ai'
+  };
+}
+
+// ===================== 抓取網頁標題與描述（規則式輔助）=====================
+async function fetchPageMeta(url) {
+  // 用 r.jina.ai 免費代理（會回傳網頁的純文字內容）
+  try {
+    const proxyUrl = `https://r.jina.ai/${url}`;
+    const r = await fetch(proxyUrl, {
+      headers: { 'Accept': 'text/plain' },
+      signal: AbortSignal.timeout(10000)
+    });
+    if (!r.ok) return null;
+    const text = await r.text();
+    // 第一行通常是標題
+    const firstLine = text.split('\n').find(l => l.trim());
+    return {
+      title: firstLine ? firstLine.slice(0, 100) : null,
+      content: text.slice(0, 3000)  // 取前 3000 字
+    };
+  } catch (e) {
+    return null;
+  }
+}
+
+// ===================== 主流程：擷取並分析 =====================
+async function captureAndAnalyze() {
+  const text = document.getElementById('captureInput').value.trim();
+  const images = state.pendingImages;
+  if (!text && images.length === 0) {
+    toast('請輸入內容或上傳圖片');
+    return;
+  }
+
+  const submitBtn = document.getElementById('submitBtn');
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = '<div class="spinner"></div><span>分析中…</span>';
+
+  try {
+    const urls = extractUrls(text);
+    let enrichedText = text;
+
+    // 如果有 URL 且使用規則式：嘗試抓取網頁內容輔助
+    if (urls.length > 0 && (!state.preferAI || !state.hasApiKey)) {
+      try {
+        const meta = await fetchPageMeta(urls[0]);
+        if (meta && meta.content) {
+          enrichedText = text + '\n\n[網頁內容]\n' + meta.content;
+        }
+      } catch (e) { /* 失敗也沒關係 */ }
+    }
+
+    let analysis;
+    if (state.preferAI && state.hasApiKey) {
+      try {
+        analysis = await aiAnalyze(enrichedText, urls, images);
+      } catch (e) {
+        toast('AI 分析失敗，改用規則式：' + e.message);
+        analysis = ruleBasedAnalyze(enrichedText, urls);
+      }
+    } else {
+      analysis = ruleBasedAnalyze(enrichedText, urls);
+    }
+
+    const now = new Date().toISOString();
+    const item = {
+      id: Date.now().toString(),
+      createdAt: now,
+      updatedAt: now,
+      type: detectType(text, images.length > 0),
+      rawText: text,
+      urls,
+      images: [...images],
+      title: analysis.title,
+      summary: analysis.summary,
+      category: analysis.category,
+      tags: analysis.tags,
+      analysisMethod: analysis.method
+    };
+
+    state.items.unshift(item);
+    saveData();
+    fbSave(item);
+
+    // 清空輸入
+    document.getElementById('captureInput').value = '';
+    state.pendingImages = [];
+    renderImagePreviews();
+    render();
+
+    toast(`已儲存到「${getCategoryLabel(item.category)}」（${item.analysisMethod === 'ai' ? 'AI' : '規則式'}分析）`);
+  } catch (e) {
+    console.error(e);
+    toast('分析失敗：' + e.message);
+  } finally {
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span>分析並存</span>';
+  }
+}
+
+// ===================== 直接儲存（不分析）=====================
+function captureAndSave() {
+  const text = document.getElementById('captureInput').value.trim();
+  const images = state.pendingImages;
+  if (!text && images.length === 0) {
+    toast('請輸入內容或上傳圖片');
+    return;
+  }
+
+  const urls = extractUrls(text);
+  const now = new Date().toISOString();
+
+  // 自動取標題：第一行或網域，不做進一步分析
+  const firstLine = text.split('\n').find(l => l.trim());
+  let title = firstLine ? firstLine.slice(0, 80) : '';
+  if (!title && urls.length > 0) {
+    try { title = new URL(urls[0]).hostname; } catch (e) { title = urls[0].slice(0, 50); }
+  }
+  if (!title) title = images.length > 0 ? `圖片 (${images.length})` : '無標題';
+
+  const item = {
+    id: Date.now().toString(),
+    createdAt: now,
+    updatedAt: now,
+    type: detectType(text, images.length > 0),
+    rawText: text,
+    urls,
+    images: [...images],
+    title,
+    summary: '',  // 不分析所以不填
+    category: 'other',  // 預設「其他」，使用者可在詳情頁編輯
+    tags: [],
+    analysisMethod: 'manual'  // 標記為手動儲存
+  };
+
+  state.items.unshift(item);
+  saveData();
+  fbSave(item);
+
+  // 清空輸入
+  document.getElementById('captureInput').value = '';
+  state.pendingImages = [];
+  renderImagePreviews();
+  render();
+
+  toast('已直接儲存到「其他」（可點開編輯分類）');
+}
+
+function getCategoryLabel(id) {
+  const c = DEFAULT_CATEGORIES.find(c => c.id === id);
+  return c ? c.label : id;
+}
+function getCategoryEmoji(id) {
+  const c = DEFAULT_CATEGORIES.find(c => c.id === id);
+  return c ? c.emoji : '📦';
+}
+
+// ===================== 圖片處理 =====================
+function handleImageFiles(files) {
+  Array.from(files).forEach(file => {
+    if (!file.type.startsWith('image/')) return;
+    if (file.size > 5 * 1024 * 1024) {
+      toast(`${file.name} 過大（>5MB），已略過`);
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const maxW = 1200;
+        const scale = Math.min(1, maxW / img.width);
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        state.pendingImages.push(canvas.toDataURL('image/jpeg', 0.85));
+        renderImagePreviews();
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function renderImagePreviews() {
+  const c = document.getElementById('imagePreviews');
+  c.innerHTML = state.pendingImages.map((src, idx) => `
+    <div class="image-preview-item">
+      <img src="${src}" alt="">
+      <button class="image-preview-remove" data-idx="${idx}">×</button>
+    </div>
+  `).join('');
+  c.querySelectorAll('.image-preview-remove').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.pendingImages.splice(parseInt(btn.dataset.idx), 1);
+      renderImagePreviews();
+    });
+  });
+}
+
+// 拖放圖片到輸入區
+const captureCard = document.querySelector('.capture-card');
+captureCard.addEventListener('dragover', (e) => { e.preventDefault(); });
+captureCard.addEventListener('drop', (e) => {
+  e.preventDefault();
+  if (e.dataTransfer.files.length > 0) handleImageFiles(e.dataTransfer.files);
+});
+// 貼上圖片
+document.getElementById('captureInput').addEventListener('paste', (e) => {
+  const items = e.clipboardData.items;
+  const imgFiles = [];
+  for (const item of items) {
+    if (item.type.startsWith('image/')) {
+      const file = item.getAsFile();
+      if (file) imgFiles.push(file);
+    }
+  }
+  if (imgFiles.length > 0) {
+    e.preventDefault();
+    handleImageFiles(imgFiles);
+  }
+});
+
+// ===================== 渲染 =====================
+function getFilteredItems() {
+  return state.items.filter(item => {
+    if (item._deleted) return false;
+    if (state.filterCategory !== 'all' && item.category !== state.filterCategory) return false;
+    if (state.searchTerm) {
+      const t = state.searchTerm.toLowerCase();
+      return (item.title || '').toLowerCase().includes(t) ||
+             (item.summary || '').toLowerCase().includes(t) ||
+             (item.rawText || '').toLowerCase().includes(t) ||
+             (item.tags || []).some(x => x.toLowerCase().includes(t)) ||
+             (item.urls || []).some(u => u.toLowerCase().includes(t));
+    }
+    return true;
+  });
+}
+
+function renderCategoryPills() {
+  const counts = { all: 0 };
+  state.items.filter(i => !i._deleted).forEach(i => {
+    counts.all++;
+    counts[i.category] = (counts[i.category] || 0) + 1;
+  });
+
+  const html = [
+    `<button class="pill ${state.filterCategory === 'all' ? 'active' : ''}" data-cat="all">全部 <span class="pill-count">${counts.all}</span></button>`,
+    ...DEFAULT_CATEGORIES.filter(c => counts[c.id] > 0).map(c =>
+      `<button class="pill ${state.filterCategory === c.id ? 'active' : ''}" data-cat="${c.id}">${c.emoji} ${c.label} <span class="pill-count">${counts[c.id]}</span></button>`
+    )
+  ].join('');
+
+  document.getElementById('categoryPills').innerHTML = html;
+  document.querySelectorAll('.pill').forEach(p => {
+    p.addEventListener('click', () => {
+      state.filterCategory = p.dataset.cat;
+      render();
+    });
+  });
+}
+
+function renderItem(item) {
+  const cat = DEFAULT_CATEGORIES.find(c => c.id === item.category) || DEFAULT_CATEGORIES[DEFAULT_CATEGORIES.length - 1];
+  return `
+    <div class="item" data-id="${item.id}">
+      <div class="item-header">
+        <span class="item-category">${cat.emoji} ${cat.label}</span>
+        <span class="item-time">${timeAgo(item.createdAt)}</span>
+      </div>
+      <div class="item-title">${escapeHtml(item.title)}</div>
+      ${item.summary ? `<div class="item-summary">${escapeHtml(item.summary)}</div>` : ''}
+      ${item.urls && item.urls.length > 0 ? `
+        <a href="${escapeHtml(item.urls[0])}" target="_blank" rel="noopener" class="item-link" onclick="event.stopPropagation()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          ${escapeHtml(item.urls[0].replace(/^https?:\/\//, '').slice(0, 50))}${item.urls[0].length > 50 ? '…' : ''}
+        </a>
+      ` : ''}
+      ${item.images && item.images.length > 0 ? `
+        <div class="item-images">
+          ${item.images.slice(0, 3).map(img => `<div class="item-image"><img src="${img}" alt=""></div>`).join('')}
+          ${item.images.length > 3 ? `<div class="item-image" style="display:flex;align-items:center;justify-content:center;color:var(--text-mute);font-size:13px">+${item.images.length - 3}</div>` : ''}
+        </div>
+      ` : ''}
+      ${item.tags && item.tags.length > 0 ? `
+        <div class="item-tags">
+          ${item.tags.map(t => `<span class="item-tag">${escapeHtml(t)}</span>`).join('')}
+        </div>
+      ` : ''}
+      <div class="item-source">${item.analysisMethod === 'ai' ? '🤖 AI 分析' : item.analysisMethod === 'manual' ? '📥 直接存' : '📋 規則式'}</div>
+    </div>
+  `;
+}
+
+function render() {
+  renderCategoryPills();
+
+  const filtered = getFilteredItems();
+  if (filtered.length === 0) {
+    document.getElementById('content').innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">${state.items.length === 0 ? '🧰' : '🔍'}</div>
+        <h3>${state.items.length === 0 ? '工具箱還是空的' : '沒有符合條件的內容'}</h3>
+        <p>${state.items.length === 0 ? '貼一個連結、文字或圖片試試看' : '試試調整篩選條件'}</p>
+      </div>
+    `;
+    return;
+  }
+
+  document.getElementById('content').innerHTML = `
+    <div class="item-list">${filtered.map(renderItem).join('')}</div>
+  `;
+
+  document.querySelectorAll('.item').forEach(el => {
+    el.addEventListener('click', () => {
+      const item = state.items.find(x => x.id === el.dataset.id);
+      if (item) openDetail(item);
+    });
+  });
+}
+
+// ===================== 詳情 =====================
+function openDetail(item) {
+  const cat = DEFAULT_CATEGORIES.find(c => c.id === item.category) || DEFAULT_CATEGORIES[DEFAULT_CATEGORIES.length - 1];
+  const root = document.getElementById('modalRoot');
+  root.innerHTML = `
+    <div class="modal-backdrop" id="detailBackdrop">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-header">
+          <h2 class="modal-title">${cat.emoji} ${escapeHtml(item.title)}</h2>
+          <button class="icon-btn" id="detailClose">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+            <span class="item-category">${cat.label}</span>
+            <span class="item-time">${new Date(item.createdAt).toLocaleString('zh-TW')}</span>
+            <span class="item-time">${item.analysisMethod === 'ai' ? '🤖 AI' : item.analysisMethod === 'manual' ? '📥 直接存' : '📋 規則'}</span>
+          </div>
+
+          ${item.summary ? `
+            <div class="detail-section">
+              <div class="detail-label">摘要</div>
+              <div class="detail-value">${escapeHtml(item.summary)}</div>
+            </div>
+          ` : ''}
+
+          ${item.urls && item.urls.length > 0 ? `
+            <div class="detail-section">
+              <div class="detail-label">連結</div>
+              ${item.urls.map(u => `<a href="${escapeHtml(u)}" target="_blank" rel="noopener" class="item-link" style="margin-bottom:4px">${escapeHtml(u)}</a>`).join('')}
+            </div>
+          ` : ''}
+
+          ${item.images && item.images.length > 0 ? `
+            <div class="detail-section">
+              <div class="detail-label">圖片（${item.images.length}）</div>
+              <div class="detail-images">
+                ${item.images.map(img => `<img src="${img}" class="detail-image" alt="">`).join('')}
+              </div>
+            </div>
+          ` : ''}
+
+          ${item.tags && item.tags.length > 0 ? `
+            <div class="detail-section">
+              <div class="detail-label">標籤</div>
+              <div class="tags-list">${item.tags.map(t => `<span class="tag-chip">${escapeHtml(t)}</span>`).join('')}</div>
+            </div>
+          ` : ''}
+
+          ${item.rawText ? `
+            <div class="detail-section">
+              <div class="detail-label">原始內容</div>
+              <div class="detail-value" style="background:var(--bg2);padding:10px;border-radius:8px;font-size:13px;max-height:200px;overflow-y:auto">${escapeHtml(item.rawText)}</div>
+            </div>
+          ` : ''}
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-danger" id="detailDelete">刪除</button>
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-secondary" id="detailEdit">編輯分類</button>
+            <button class="btn btn-primary" id="detailReanalyze">重新分析</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  function close() { document.getElementById('modalRoot').innerHTML = ''; }
+  document.getElementById('detailClose').addEventListener('click', close);
+  document.getElementById('detailBackdrop').addEventListener('click', close);
+
+  document.getElementById('detailDelete').addEventListener('click', async () => {
+    if (!confirm('確定要刪除嗎？')) return;
+    state.items = state.items.filter(x => x.id !== item.id);
+    saveData();
+    await fbDelete(item.id);
+    close(); render();
+    toast('已刪除');
+  });
+
+  document.getElementById('detailEdit').addEventListener('click', () => {
+    close();
+    openEditModal(item);
+  });
+
+  document.getElementById('detailReanalyze').addEventListener('click', async () => {
+    close();
+    toast('重新分析中…');
+    try {
+      const urls = item.urls || [];
+      let analysis;
+      if (state.preferAI && state.hasApiKey) {
+        analysis = await aiAnalyze(item.rawText || '', urls, item.images || []);
+      } else {
+        analysis = ruleBasedAnalyze(item.rawText || '', urls);
+      }
+      const idx = state.items.findIndex(x => x.id === item.id);
+      if (idx >= 0) {
+        state.items[idx] = {
+          ...state.items[idx],
+          title: analysis.title,
+          summary: analysis.summary,
+          category: analysis.category,
+          tags: analysis.tags,
+          analysisMethod: analysis.method,
+          updatedAt: new Date().toISOString()
+        };
+        fbSave(state.items[idx]);
+      }
+      saveData();
+      render();
+      toast('已重新分析');
+    } catch (e) {
+      toast('分析失敗：' + e.message);
+    }
+  });
+}
+
+function openEditModal(item) {
+  const root = document.getElementById('modalRoot');
+  let editState = {
+    title: item.title,
+    summary: item.summary || '',
+    category: item.category,
+    tags: [...(item.tags || [])]
+  };
+
+  function renderModal() {
+    root.innerHTML = `
+      <div class="modal-backdrop" id="editBackdrop">
+        <div class="modal" onclick="event.stopPropagation()">
+          <div class="modal-header">
+            <h2 class="modal-title">編輯</h2>
+            <button class="icon-btn" id="editClose"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+          </div>
+          <div class="modal-body">
+            <div class="form-group">
+              <label class="form-label">標題</label>
+              <input class="form-input" id="ed_title" value="${escapeHtml(editState.title)}">
+            </div>
+            <div class="form-group">
+              <label class="form-label">摘要</label>
+              <textarea class="form-textarea" id="ed_summary" rows="4">${escapeHtml(editState.summary)}</textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">分類</label>
+              <div class="category-buttons" id="ed_cat_btns"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">標籤</label>
+              <div class="tags-list" id="ed_tags_list"></div>
+              <div class="tag-input-row">
+                <input class="form-input" id="ed_tag_input" placeholder="新增標籤…">
+                <button class="tag-add-btn" id="ed_tag_add">+</button>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button class="btn btn-secondary" id="editCancel">取消</button>
+            <button class="btn btn-primary" id="editSave">儲存</button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    document.getElementById('ed_cat_btns').innerHTML = DEFAULT_CATEGORIES.map(c => `
+      <button class="cat-btn ${editState.category === c.id ? 'active' : ''}" data-cat="${c.id}">${c.emoji} ${c.label}</button>
+    `).join('');
+    document.querySelectorAll('#ed_cat_btns .cat-btn').forEach(b => {
+      b.addEventListener('click', () => { editState.category = b.dataset.cat; renderModal(); });
+    });
+
+    document.getElementById('ed_tags_list').innerHTML = editState.tags.map(t => `
+      <span class="tag-chip">${escapeHtml(t)} <button data-tag="${escapeHtml(t)}">×</button></span>
+    `).join('');
+    document.querySelectorAll('#ed_tags_list button').forEach(b => {
+      b.addEventListener('click', () => {
+        editState.tags = editState.tags.filter(t => t !== b.dataset.tag);
+        renderModal();
+      });
+    });
+
+    document.getElementById('ed_tag_add').addEventListener('click', () => {
+      const inp = document.getElementById('ed_tag_input');
+      const v = inp.value.trim();
+      if (v && !editState.tags.includes(v)) {
+        editState.tags.push(v);
+        inp.value = '';
+        renderModal();
+      }
+    });
+    document.getElementById('ed_tag_input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); document.getElementById('ed_tag_add').click(); }
+    });
+
+    function close() { document.getElementById('modalRoot').innerHTML = ''; }
+    document.getElementById('editClose').addEventListener('click', close);
+    document.getElementById('editBackdrop').addEventListener('click', close);
+    document.getElementById('editCancel').addEventListener('click', close);
+
+    document.getElementById('editSave').addEventListener('click', () => {
+      const idx = state.items.findIndex(x => x.id === item.id);
+      if (idx >= 0) {
+        state.items[idx] = {
+          ...state.items[idx],
+          title: document.getElementById('ed_title').value.trim() || '無標題',
+          summary: document.getElementById('ed_summary').value.trim(),
+          category: editState.category,
+          tags: editState.tags,
+          updatedAt: new Date().toISOString()
+        };
+        fbSave(state.items[idx]);
+      }
+      saveData();
+      close(); render();
+      toast('已儲存');
+    });
+  }
+  renderModal();
+}
+
+// ===================== 設定 Modal =====================
+// ===================== 統計與摘要 =====================
+function calculateStats() {
+  const active = state.items.filter(i => !i._deleted);
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  // 過去 7 天的活動
+  const days = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const next = new Date(d);
+    next.setDate(next.getDate() + 1);
+    const count = active.filter(item => {
+      const ts = new Date(item.createdAt).getTime();
+      return ts >= d.getTime() && ts < next.getTime();
+    }).length;
+    days.push({
+      date: d,
+      count,
+      label: ['日', '一', '二', '三', '四', '五', '六'][d.getDay()],
+      isToday: d.getTime() === today.getTime()
+    });
+  }
+
+  // 過去 7 天的所有項目
+  const weekStart = new Date(today);
+  weekStart.setDate(weekStart.getDate() - 6);
+  const weekItems = active.filter(item =>
+    new Date(item.createdAt).getTime() >= weekStart.getTime()
+  );
+
+  // 過去 30 天
+  const monthStart = new Date(today);
+  monthStart.setDate(monthStart.getDate() - 29);
+  const monthItems = active.filter(item =>
+    new Date(item.createdAt).getTime() >= monthStart.getTime()
+  );
+
+  // 各分類數量
+  const categoryCounts = {};
+  active.forEach(i => {
+    categoryCounts[i.category] = (categoryCounts[i.category] || 0) + 1;
+  });
+  const sortedCategories = Object.entries(categoryCounts)
+    .sort((a, b) => b[1] - a[1]);
+
+  // 過去 30 天最活躍分類
+  const recentCategoryCounts = {};
+  monthItems.forEach(i => {
+    recentCategoryCounts[i.category] = (recentCategoryCounts[i.category] || 0) + 1;
+  });
+  const trendingCategories = Object.entries(recentCategoryCounts)
+    .sort((a, b) => b[1] - a[1]);
+
+  // 熱門標籤（過去 30 天）
+  const tagCounts = {};
+  monthItems.forEach(i => {
+    (i.tags || []).forEach(t => {
+      tagCounts[t] = (tagCounts[t] || 0) + 1;
+    });
+  });
+  const topTags = Object.entries(tagCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 10);
+
+  // 連續紀錄天數（streak）
+  let streak = 0;
+  for (let i = 0; i < days.length; i++) {
+    const d = days[days.length - 1 - i]; // 從今天往回
+    if (d.count > 0) streak++;
+    else break;
+  }
+
+  // 按分類分組過去一週的項目
+  const weekByCategory = {};
+  weekItems.forEach(item => {
+    if (!weekByCategory[item.category]) weekByCategory[item.category] = [];
+    weekByCategory[item.category].push(item);
+  });
+
+  return {
+    total: active.length,
+    weekCount: weekItems.length,
+    monthCount: monthItems.length,
+    days,
+    streak,
+    sortedCategories,
+    trendingCategories,
+    topTags,
+    weekItems: weekItems.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || '')),
+    weekByCategory
+  };
+}
+
+function openStats() {
+  const s = calculateStats();
+  const root = document.getElementById('modalRoot');
+
+  // 7 天活動圖
+  const maxDayCount = Math.max(1, ...s.days.map(d => d.count));
+  const activityHtml = s.days.map(d => {
+    const heightPct = (d.count / maxDayCount) * 100;
+    const dateStr = `${d.date.getMonth() + 1}/${d.date.getDate()}`;
+    return `
+      <div class="stats-activity-day" title="${dateStr} 週${d.label}: ${d.count} 筆">
+        <div class="stats-activity-day-count">${d.count > 0 ? d.count : ''}</div>
+        <div class="stats-activity-bar ${d.count === 0 ? 'zero' : ''}" style="height:${Math.max(3, heightPct)}%${d.isToday ? ';background:var(--purple)' : ''}"></div>
+        <div class="stats-activity-day-label">${d.isToday ? '今' : d.label}</div>
+      </div>
+    `;
+  }).join('');
+
+  // 分類條形圖
+  const totalForBars = s.sortedCategories.reduce((sum, [, c]) => sum + c, 0) || 1;
+  const categoryBarsHtml = s.sortedCategories.map(([cat, count]) => {
+    const c = DEFAULT_CATEGORIES.find(x => x.id === cat) || { emoji: '📦', label: cat };
+    const pct = (count / totalForBars) * 100;
+    return `
+      <div class="stats-bar-row">
+        <span class="stats-bar-label">${c.emoji} ${escapeHtml(c.label)}</span>
+        <div class="stats-bar-track"><div class="stats-bar-fill" style="width:${pct}%"></div></div>
+        <span class="stats-bar-count">${count}</span>
+      </div>
+    `;
+  }).join('') || '<div style="color:var(--text-mute);font-size:13px;text-align:center;padding:20px">尚無資料</div>';
+
+  // 趨勢分類（過去 30 天）
+  const trendingHtml = s.trendingCategories.length > 0
+    ? s.trendingCategories.slice(0, 5).map(([cat, count], idx) => {
+        const c = DEFAULT_CATEGORIES.find(x => x.id === cat) || { emoji: '📦', label: cat };
+        const trendIcon = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : '·';
+        return `
+          <div class="stats-bar-row">
+            <span class="stats-bar-label">${trendIcon} ${c.emoji} ${escapeHtml(c.label)}</span>
+            <div class="stats-bar-track"><div class="stats-bar-fill" style="width:${(count / s.trendingCategories[0][1]) * 100}%"></div></div>
+            <span class="stats-bar-count">${count}</span>
+          </div>
+        `;
+      }).join('')
+    : '<div style="color:var(--text-mute);font-size:13px;text-align:center;padding:12px">過去 30 天無資料</div>';
+
+  // 熱門標籤
+  const topTagsHtml = s.topTags.length > 0
+    ? `<div class="tags-list">${s.topTags.map(([tag, count]) =>
+        `<span class="tag-chip" style="cursor:pointer" data-tag="${escapeHtml(tag)}">${escapeHtml(tag)} <span style="opacity:0.7">${count}</span></span>`
+      ).join('')}</div>`
+    : '<div style="color:var(--text-mute);font-size:13px">過去 30 天還沒累積標籤</div>';
+
+  // 過去一週各分類摘要
+  const weekSummaryHtml = Object.keys(s.weekByCategory).length > 0
+    ? Object.entries(s.weekByCategory)
+        .sort((a, b) => b[1].length - a[1].length)
+        .map(([cat, items]) => {
+          const c = DEFAULT_CATEGORIES.find(x => x.id === cat) || { emoji: '📦', label: cat };
+          return `
+            <div class="summary-section">
+              <div class="summary-section-title">
+                ${c.emoji} ${escapeHtml(c.label)}
+                <span class="summary-section-count">${items.length} 筆</span>
+              </div>
+              <div class="summary-list">
+                ${items.map(item => `
+                  <div class="summary-item" data-id="${item.id}">
+                    <div class="summary-item-title">${escapeHtml(item.title)}</div>
+                    <div class="summary-item-meta">${timeAgo(item.createdAt)}${item.tags && item.tags.length ? ' · ' + item.tags.slice(0, 3).join(' · ') : ''}</div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        }).join('')
+    : '<div style="color:var(--text-mute);font-size:13px;text-align:center;padding:30px">過去一週還沒有紀錄，去存點東西吧 ✨</div>';
+
+  root.innerHTML = `
+    <div class="modal-backdrop" id="statsBackdrop">
+      <div class="modal" onclick="event.stopPropagation()" style="max-width:640px">
+        <div class="modal-header">
+          <h2 class="modal-title">📊 統計與摘要</h2>
+          <button class="icon-btn" id="statsClose">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <div class="modal-body">
+
+          <!-- 數據卡片 -->
+          <div class="stats-grid">
+            <div class="stats-card">
+              <div class="stats-card-label">總計</div>
+              <div class="stats-card-value">${s.total}</div>
+              <div class="stats-card-sub">本週 +${s.weekCount}・本月 +${s.monthCount}</div>
+            </div>
+            <div class="stats-card">
+              <div class="stats-card-label">連續記錄</div>
+              <div class="stats-card-value">${s.streak} <span style="font-size:14px;color:var(--text-mute);font-weight:400">天</span></div>
+              <div class="stats-card-sub">${s.streak === 0 ? '今天還沒存東西' : s.streak >= 7 ? '🔥 一週連勝' : s.streak >= 3 ? '✨ 持續中' : '繼續加油'}</div>
+            </div>
+          </div>
+
+          <!-- 過去 7 天活動圖 -->
+          <div style="margin-bottom:20px">
+            <div class="summary-section-title">📅 過去 7 天活動</div>
+            <div class="stats-activity">${activityHtml}</div>
+          </div>
+
+          <!-- 趨勢：過去 30 天最活躍分類 -->
+          <div style="margin-bottom:20px">
+            <div class="summary-section-title">📈 最近活躍分類 <span class="summary-section-count">過去 30 天</span></div>
+            <div class="stats-bars">${trendingHtml}</div>
+          </div>
+
+          <!-- 全部分類分布 -->
+          <div style="margin-bottom:20px">
+            <div class="summary-section-title">📦 所有分類分布</div>
+            <div class="stats-bars">${categoryBarsHtml}</div>
+          </div>
+
+          <!-- 熱門標籤 -->
+          <div style="margin-bottom:20px">
+            <div class="summary-section-title">🏷️ 熱門標籤 <span class="summary-section-count">過去 30 天</span></div>
+            ${topTagsHtml}
+          </div>
+
+          <!-- 本週摘要 -->
+          <div style="margin-top:24px;padding-top:20px;border-top:2px dashed var(--line)">
+            <div class="summary-section-title" style="font-size:15px;margin-bottom:14px">
+              📝 本週收藏 <span class="summary-section-count">過去 7 天 · ${s.weekCount} 筆</span>
+            </div>
+            ${weekSummaryHtml}
+          </div>
+
+        </div>
+      </div>
+    </div>
+  `;
+
+  function close() { document.getElementById('modalRoot').innerHTML = ''; }
+  document.getElementById('statsClose').addEventListener('click', close);
+  document.getElementById('statsBackdrop').addEventListener('click', close);
+
+  // 點摘要項目進入詳情
+  document.querySelectorAll('.summary-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const item = state.items.find(x => x.id === el.dataset.id);
+      if (item) {
+        close();
+        setTimeout(() => openDetail(item), 100);
+      }
+    });
+  });
+
+  // 點熱門標籤直接搜尋
+  document.querySelectorAll('.tag-chip[data-tag]').forEach(el => {
+    el.addEventListener('click', () => {
+      const tag = el.dataset.tag;
+      document.getElementById('searchInput').value = tag;
+      state.searchTerm = tag;
+      close();
+      render();
+    });
+  });
+}
+
+function openSettings() {
+  const root = document.getElementById('modalRoot');
+  const apiKey = localStorage.getItem(AI_KEY_KEY) || '';
+
+  root.innerHTML = `
+    <div class="modal-backdrop" id="settingsBackdrop">
+      <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-header">
+          <h2 class="modal-title">⚙️ 設定</h2>
+          <button class="icon-btn" id="settingsClose"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+        </div>
+        <div class="modal-body">
+
+          <div class="settings-section">
+            <h4>🤖 Claude AI 分析</h4>
+            <p>填入 API key 後可使用真正的 AI 分析（更精確的分類、摘要、標籤）。<a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">前往申請</a>。Key 只儲存在你的瀏覽器中。</p>
+            <div class="settings-row">
+              <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." value="${escapeHtml(apiKey)}">
+              <button id="apiKeyToggle" style="padding:0 12px;background:var(--bg2);border:1px solid var(--line);border-radius:6px;font-size:12px;color:var(--text-soft)">顯示</button>
+            </div>
+            <div class="settings-actions">
+              <button class="primary" id="apiKeySave">儲存</button>
+              <button id="apiKeyClear">移除</button>
+            </div>
+            <div id="apiKeyResult" style="margin-top:10px"></div>
+          </div>
+
+          <div class="settings-section">
+            <h4>☁️ Firebase 雲端同步</h4>
+            <div id="fbSyncStatus" class="settings-status-line ok">已連線 Firebase（即時同步中）</div>
+            <p>資料即時同步至 Firebase Firestore，電腦與手機共用同一份資料庫，無需任何設定。</p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  `;
+
+  function close() { document.getElementById('modalRoot').innerHTML = ''; }
+  document.getElementById('settingsClose').addEventListener('click', close);
+  document.getElementById('settingsBackdrop').addEventListener('click', close);
+
+  // API key 顯示/隱藏
+  document.getElementById('apiKeyToggle').addEventListener('click', () => {
+    const inp = document.getElementById('apiKeyInput');
+    const btn = document.getElementById('apiKeyToggle');
+    if (inp.type === 'password') { inp.type = 'text'; btn.textContent = '隱藏'; }
+    else { inp.type = 'password'; btn.textContent = '顯示'; }
+  });
+
+  document.getElementById('apiKeySave').addEventListener('click', () => {
+    const v = document.getElementById('apiKeyInput').value.trim();
+    if (!v) {
+      showResult('apiKeyResult', 'error', '請輸入 API key');
+      return;
+    }
+    localStorage.setItem(AI_KEY_KEY, v);
+    state.hasApiKey = true;
+    state.preferAI = true;
+    localStorage.setItem(PREFER_AI_KEY, '1');
+    updateAiToggle();
+    showResult('apiKeyResult', 'ok', '✓ 已儲存。AI 分析已啟用');
+  });
+
+  document.getElementById('apiKeyClear').addEventListener('click', () => {
+    if (!confirm('確定移除 API key？')) return;
+    localStorage.removeItem(AI_KEY_KEY);
+    state.hasApiKey = false;
+    state.preferAI = false;
+    localStorage.removeItem(PREFER_AI_KEY);
+    updateAiToggle();
+    document.getElementById('apiKeyInput').value = '';
+    showResult('apiKeyResult', 'ok', '已移除，將使用規則式分析');
+  });
+
+}
+
+function showResult(elId, kind, msg) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  const colors = {
+    ok: 'background:rgba(74,222,128,0.15);color:var(--green)',
+    error: 'background:rgba(248,113,113,0.15);color:var(--red)',
+    info: 'background:rgba(96,165,250,0.15);color:var(--accent)'
+  };
+  el.innerHTML = `<div style="padding:8px 10px;border-radius:6px;font-size:12px;${colors[kind] || ''}">${escapeHtml(msg)}</div>`;
+}
+
+function updateAiToggle() {
+  const lbl = document.getElementById('aiToggleLabel');
+  const btn = document.getElementById('aiToggleBtn');
+  if (state.preferAI && state.hasApiKey) {
+    lbl.textContent = 'AI 分析';
+    btn.classList.add('active');
+  } else if (state.hasApiKey) {
+    lbl.textContent = '規則式';
+    btn.classList.remove('active');
+  } else {
+    lbl.textContent = '規則式';
+    btn.classList.remove('active');
+  }
+}
+
+// ===================== 匯入/匯出 =====================
+function exportData() {
+  const blob = new Blob([JSON.stringify(state.items, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `toolbox-${new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('已匯出');
+}
+
+function importData(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!Array.isArray(data)) throw new Error('格式錯誤');
+      const choice = confirm(`找到 ${data.length} 筆\n【確定】= 取代\n【取消】= 合併`);
+      if (choice) state.items = data;
+      else {
+        const ids = new Set(state.items.map(x => x.id));
+        state.items = [...data.filter(x => !ids.has(x.id)), ...state.items];
+      }
+      saveData();
+      state.items.forEach(i => fbSave(i));
+      render();
+      toast(choice ? '已取代（同步中…）' : '已合併（同步中…）');
+    } catch (err) { alert('檔案錯誤：' + err.message); }
+  };
+  reader.readAsText(file);
+}
+
+// ===================== 事件綁定 =====================
+document.getElementById('submitBtn').addEventListener('click', captureAndAnalyze);
+document.getElementById('saveOnlyBtn').addEventListener('click', captureAndSave);
+document.getElementById('captureInput').addEventListener('keydown', (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
+    e.preventDefault();
+    captureAndAnalyze();
+  }
+});
+document.getElementById('imageInput').addEventListener('change', (e) => {
+  if (e.target.files.length > 0) handleImageFiles(e.target.files);
+  e.target.value = '';
+});
+document.getElementById('aiToggleBtn').addEventListener('click', () => {
+  if (!state.hasApiKey) {
+    toast('需要先在設定中填入 API key');
+    openSettings();
+    return;
+  }
+  state.preferAI = !state.preferAI;
+  localStorage.setItem(PREFER_AI_KEY, state.preferAI ? '1' : '0');
+  updateAiToggle();
+  toast(state.preferAI ? '已切換到 AI 分析' : '已切換到規則式');
+});
+document.getElementById('searchInput').addEventListener('input', (e) => {
+  state.searchTerm = e.target.value;
+  render();
+});
+document.getElementById('settingsBtn').addEventListener('click', openSettings);
+document.getElementById('statsBtn').addEventListener('click', openStats);
+document.getElementById('syncBtn').addEventListener('click', () => {
+  const ok = document.getElementById('syncBtn').classList.contains('sync-ok');
+  toast(ok ? `✅ Firebase 即時同步中 (${state.items.length} 筆)` : '🔄 連線中…');
+});
+document.getElementById('exportBtn').addEventListener('click', exportData);
+document.getElementById('importInput').addEventListener('change', (e) => {
+  const f = e.target.files[0];
+  if (f) importData(f);
+  e.target.value = '';
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') document.getElementById('modalRoot').innerHTML = '';
+});
+
+// ===================== 初始化 =====================
+loadData();
+updateAiToggle();
+render();
+setSyncStatus('syncing', '連線中…');
+
+// Firebase 即時同步監聽
+onSnapshot(collection(db, FB_COL), snapshot => {
+  const docs = snapshot.docs.map(d => {
+    const { _ts, ...rest } = d.data();
+    return { ...rest, images: localImages[rest.id || d.id] || rest.images || [] };
+  });
+  docs.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+  state.items = docs;
+  saveDataLocal();
+  render();
+  setSyncStatus('ok', `已同步 (${docs.length} 筆)`);
+}, err => {
+  setSyncStatus('error', '連線失敗：' + err.code);
+  console.error('Firestore error:', err);
+});
+</script>
+</body>
+</html>
