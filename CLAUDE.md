@@ -10,6 +10,7 @@
 | 💡 快速靈感捕捉 | https://114330111-lgtm.github.io/quick-capture/ |
 | 🍽️ 美食筆記 | https://114330111-lgtm.github.io/quick-capture/restaurant.html |
 | 🛍️ 購物清單 | https://114330111-lgtm.github.io/quick-capture/wantlist.html |
+| 🧰 知識工具箱 | https://114330111-lgtm.github.io/quick-capture/toolbox.html |
 
 - **GitHub Repo**：https://github.com/114330111-lgtm/quick-capture.git
 - **Branch**：master
@@ -20,6 +21,7 @@ C:\Users\lenny\Documents\quick-capture\
 ├── index.html        # 💡 快速靈感捕捉（主程式）
 ├── restaurant.html   # 🍽️ 美食筆記
 ├── wantlist.html     # 🛍️ 購物清單
+├── toolbox.html      # 🧰 知識工具箱
 ├── sw.js             # Service Worker（v3，永遠從網路取得）
 ├── manifest.json     # PWA manifest
 ├── icon.svg          # App icon
@@ -34,6 +36,7 @@ C:\Users\lenny\Documents\quick-capture\
   - `ideas`（快速靈感捕捉）
   - `restaurants`（美食筆記）
   - `wantlist`（購物清單）
+  - `toolbox`（知識工具箱）
 
 ## 資料結構（Firestore document）
 ```json
@@ -102,6 +105,12 @@ C:\Users\lenny\Documents\quick-capture\
 - 品牌、國別、類別、尺寸、顏色、商品連結
 - 價格歷史追蹤（可記錄多次價格變動）
 - ⚠️ 照片僅存本機，不同步至 Firestore
+
+### 🧰 知識工具箱（toolbox.html）
+- 書籤式知識收藏：網頁、書籍、工具、想法等
+- Claude AI 分析（填入 API key 後啟用）：自動分類、摘要、標籤
+- 多種分類、狀態、標籤篩選
+- ⚠️ 圖片僅存本機，不同步至 Firestore
 
 ## 已知注意事項
 - **部署方式**：直接 `git push origin master`，GitHub Pages 自動更新（約 1-3 分鐘）
